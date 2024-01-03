@@ -1,9 +1,13 @@
 package com.zerp.taskmanagement.dbentity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class Project {
@@ -15,6 +19,10 @@ public class Project {
     private String projectDescription;
     private String startDate;
     private String endDate;
+
+    @OneToMany(mappedBy = "project")
+    private Set<Task> tasks = new HashSet<>();
+
     public long getProjectId() {
         return projectId;
     }

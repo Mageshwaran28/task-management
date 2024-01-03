@@ -1,5 +1,6 @@
 package com.zerp.taskmanagement.dbentity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,15 +21,15 @@ public class Task {
     private String priority;
     private String status;
 
-    @ManyToOne
-    @JoinColumn(name = "creator", referencedColumnName = "userId", nullable = false)
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "creator" , referencedColumnName = "userId", nullable = false)
     private User creator;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "assignee", referencedColumnName = "userId", nullable = true)
     private User assignee;
 
-    @ManyToOne
+    @ManyToOne( cascade = CascadeType.ALL)
     @JoinColumn(name = "project_id", referencedColumnName = "projectId" , nullable = false)
     private Project project;
 

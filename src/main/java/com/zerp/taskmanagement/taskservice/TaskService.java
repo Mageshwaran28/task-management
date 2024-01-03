@@ -17,5 +17,14 @@ public class TaskService {
     public List<Task> findAll() {
         return taskRepository.findAll();
     }
+
+    public List<Task> findByPriority(String priority) {
+        return taskRepository.findByPriority(priority);
+    }
+
+    public String addTask(Task task) {
+        taskRepository.save(task);
+        return "success";
+    }
     
 }

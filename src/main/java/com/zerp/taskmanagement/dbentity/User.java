@@ -1,9 +1,13 @@
 package com.zerp.taskmanagement.dbentity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class User {
@@ -16,6 +20,12 @@ public class User {
     private String employeeRole;
     private String userName;
     private String password;
+
+    @OneToMany(mappedBy = "assignee")
+    private Set<Task> assignedTasks = new HashSet<>();
+
+    @OneToMany(mappedBy = "creator")
+    private Set<Task> createdTasks = new HashSet<>();
 
     public long getUserId() {
         return userId;
