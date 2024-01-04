@@ -1,5 +1,6 @@
 package com.zerp.taskmanagement.dbentity;
 
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 
 @Entity
 public class Task {
@@ -21,17 +21,17 @@ public class Task {
     private String priority;
     private String status;
 
+    @ManyToOne(cascade =  CascadeType.ALL)
+    @JoinColumn(name = "creator_id" , referencedColumnName = "UserId")
+    public User creator;
+
+    @ManyToOne(cascade =  CascadeType.ALL)
+    @JoinColumn(name = "assignee_id" , referencedColumnName = "UserId")
+    public User assignee;
+
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "creator" , referencedColumnName = "userId", nullable = false)
-    private User creator;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "assignee", referencedColumnName = "userId", nullable = true)
-    private User assignee;
-
-    @ManyToOne( cascade = CascadeType.ALL)
-    @JoinColumn(name = "project_id", referencedColumnName = "projectId" , nullable = false)
-    private Project project;
+    @JoinColumn(name = "project_id", referencedColumnName = "projectId")
+    public Project project;
 
     public long getTaskId() {
         return taskId;
@@ -81,6 +81,14 @@ public class Task {
         this.status = status;
     }
 
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
     public User getCreator() {
         return creator;
     }
@@ -97,12 +105,5 @@ public class Task {
         this.assignee = assignee;
     }
 
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
+    
 }

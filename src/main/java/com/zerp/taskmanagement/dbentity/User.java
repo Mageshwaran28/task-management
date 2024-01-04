@@ -3,6 +3,8 @@ package com.zerp.taskmanagement.dbentity;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,12 +22,14 @@ public class User {
     private String employeeRole;
     private String userName;
     private String password;
-
-    @OneToMany(mappedBy = "assignee")
-    private Set<Task> assignedTasks = new HashSet<>();
-
+    
+    @JsonIgnore
     @OneToMany(mappedBy = "creator")
-    private Set<Task> createdTasks = new HashSet<>();
+    public Set<Task> creatorTask = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "assignee")
+    public Set<Task> assigneTask = new HashSet<>();
 
     public long getUserId() {
         return userId;
@@ -74,5 +78,22 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public Set<Task> getCreatorTask() {
+        return creatorTask;
+    }
+
+    public void setCreatorTask(Set<Task> creatorTask) {
+        this.creatorTask = creatorTask;
+    }
+
+    public Set<Task> getAssigneTask() {
+        return assigneTask;
+    }
+
+    public void setAssigneTask(Set<Task> assigneTask) {
+        this.assigneTask = assigneTask;
+    }
+
 
 }

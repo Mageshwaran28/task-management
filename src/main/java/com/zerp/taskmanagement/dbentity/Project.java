@@ -1,7 +1,11 @@
 package com.zerp.taskmanagement.dbentity;
 
+
+
 import java.util.HashSet;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,8 +24,9 @@ public class Project {
     private String startDate;
     private String endDate;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "project")
-    private Set<Task> tasks = new HashSet<>();
+    public Set<Task> tasks = new HashSet<>();
 
     public long getProjectId() {
         return projectId;
@@ -52,6 +57,12 @@ public class Project {
     }
     public void setEndDate(String endDate) {
         this.endDate = endDate;
+    }
+    public Set<Task> getTasks() {
+        return tasks;
+    }
+    public void setTasks(Set<Task> tasks) {
+        this.tasks = tasks;
     }
 
     
