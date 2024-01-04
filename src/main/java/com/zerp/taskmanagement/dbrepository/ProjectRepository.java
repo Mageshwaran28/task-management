@@ -8,4 +8,6 @@ import com.zerp.taskmanagement.dbentity.Project;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project , Long>{
     
+    Project findByProjectId(Long projectId);
+
 }
