@@ -1,5 +1,8 @@
 package com.zerp.taskmanagement.taskservice;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +18,14 @@ public class UserService {
     public String addUser(User user) {
         userRepository.save(user);
         return "success";
+    }
+
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    public Optional<User> findByUserId(long userId) {
+        return userRepository.findById(userId);
     }
     
 }
