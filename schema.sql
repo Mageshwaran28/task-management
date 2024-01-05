@@ -6,7 +6,7 @@ show tables;
 desc task;
 select * from user;
 select * from task;
-delete from task;
+delete from user;
 select * from project;
 INSERT INTO user (employee_name, user_name, mobile_number, employee_role, password) 
 VALUES ('John Doe', 'john.doe', '1234567890', 'ADMIN', 'password123'),
@@ -49,18 +49,18 @@ VALUES ('Project Alpha', 'Description for Project Alpha', '2024-01-01', '2024-03
 desc task;
 INSERT INTO task (task_title, task_description, priority, status, due_date) 
 VALUES 
-  ('Task 1', 'Description for Task 1', 'High', 'Pending', '2024-01-15'),
-  ('Task 2', 'Description for Task 2', 'Medium', 'Processing', '2024-02-28'),
-  ('Task 3', 'Description for Task 3', 'Low', 'Completed', '2024-03-20'),
-  ('Task 4', 'Description for Task 4', 'High', 'Pending', '2024-04-05'),
-  ('Task 5', 'Description for Task 5', 'Medium', 'Processing', '2024-05-20'),
-  ('Task 6', 'Description for Task 6', 'Low', 'Completed', '2024-06-15'),
-  ('Task 7', 'Description for Task 7', 'High', 'Pending', '2024-07-01'),
-  ('Task 8', 'Description for Task 8', 'Medium', 'Processing', '2024-08-10'),
-  ('Task 9', 'Description for Task 9', 'Low', 'Completed', '2024-09-05'),
-  ('Task 10', 'Description for Task 10', 'High', 'Pending', '2024-10-20'),
-  ('Task 11', 'Description for Task 11', 'Medium', 'Processing', '2024-11-15'),
-  ('Task 12', 'Description for Task 12', 'Low', 'Completed', '2024-12-01'),
-  ('Task 13', 'Description for Task 13', 'High', 'Pending', '2025-01-10'),
-  ('Task 14', 'Description for Task 14', 'Medium', 'Processing', '2025-02-05'),
-  ('Task 15', 'Description for Task 15', 'Low', 'Completed', '2025-03-20');
+  ('Task 1', 'Description for Task 1', 1, 1, '2024-01-15'),
+  ('Task 2', 'Description for Task 2', 2, 2, '2024-02-28'),
+  ('Task 3', 'Description for Task 3', 3, 3, '2024-03-20'),
+  ('Task 4', 'Description for Task 4', 1, 1, '2024-04-05'),
+  ('Task 5', 'Description for Task 5', 2, 2, '2024-05-20'),
+  ('Task 6', 'Description for Task 6', 3, 3, '2024-06-15'),
+  ('Task 7', 'Description for Task 7', 1, 1, '2024-07-01'),
+  ('Task 8', 'Description for Task 8', 2, 2, '2024-08-10'),
+  ('Task 9', 'Description for Task 9', 3, 3, '2024-09-05'),
+  ('Task 10', 'Description for Task 10', 1, 1, '2024-10-20'),
+  ('Task 11', 'Description for Task 11', 2, 2, '2024-11-15'),
+  ('Task 12', 'Description for Task 12', 3, 3, '2024-12-01'),
+  ('Task 13', 'Description for Task 13', 1, 1, '2025-01-10'),
+  ('Task 14', 'Description for Task 14', 2, 2, '2025-02-05'),
+  ('Task 15', 'Description for Task 15', 3, 3, '2025-03-20');
