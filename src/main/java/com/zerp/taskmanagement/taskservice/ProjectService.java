@@ -1,7 +1,7 @@
 package com.zerp.taskmanagement.taskservice;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,14 +17,14 @@ public class ProjectService {
     @Autowired
     ProjectRepository projectRepository;
 
-    public ResponseEntity<List<Project>> getProjects() {
-        try {
-            return new ResponseEntity<>(projectRepository.findAll(), HttpStatus.OK);
-        } catch (Exception e) {
-            e.printStackTrace();
+    public List<Project> getProjects() {
+       List<Project> projects = projectRepository.findAll();
+        
+        if(projects.size() == 0) {
+            throw new NoSuchElementException("No value is present in database , Please change your request" );
         }
 
-        return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
+        return projects;
     }
 
     public ResponseEntity<String> addProject(Project project) {
@@ -33,6 +33,12 @@ public class ProjectService {
     }
 
     public Project findByprojectId(long projectId) {
-        return projectRepository.findByProjectId(projectId);
+        Project project =  projectRepository.findByProjectId(projectId);
+        
+        if(project == null) {
+            throw new NoSuchElementException("No value is present in database , Please change your request" );
+        }
+
+        return project;
     }
 }

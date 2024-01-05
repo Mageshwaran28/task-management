@@ -22,7 +22,7 @@ public class ProjectController {
     ProjectService projectService;
 
     @GetMapping("/projects")
-    public ResponseEntity<List<Project>> getProjects() {
+    public List<Project> getProjects() {
         return projectService.getProjects();
     }
 

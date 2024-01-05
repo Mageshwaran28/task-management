@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.zerp.taskmanagement.dbentity.Task;
 import com.zerp.taskmanagement.dto.TaskDTO;
+import com.zerp.taskmanagement.myenum.Priority;
+import com.zerp.taskmanagement.myenum.Status;
 import com.zerp.taskmanagement.taskservice.TaskService;
 
 @RestController
@@ -26,13 +28,15 @@ public class TaskController {
         return taskService.findAll();
     }
 
-    @GetMapping("/tasks/priority/{priority}")
-    public List<Task> getTasksByPriority(@PathVariable String priority) {
+    @GetMapping("/tasks/priority/{priorityId}")
+    public List<Task> getTasksByPriority(@PathVariable String priorityId) {
+        Priority priority = Priority.fromString(priorityId);
         return taskService.findByPriority(priority);
     }
 
-    @GetMapping("/tasks/status/{status}")
-    public List<Task> getTasksByStatus(@PathVariable String status) {
+    @GetMapping("/tasks/status/{statusId}")
+    public List<Task> getTasksByStatus(@PathVariable String statusId) {
+        Status status = Status.fromString(statusId);
         return taskService.findByStatus(status);
     }
 
@@ -42,19 +46,8 @@ public class TaskController {
     }
 
     @PostMapping("/task/add")
-    public String addTask(@RequestBody Task task) {
-        return taskService.addTask(task);
-    }
-
-    
-    @PostMapping("/assign")
-    public Task taskAssign(@RequestBody TaskDTO taskDTO){
-        System.out.println(taskDTO.toString());
-        long taskId = taskDTO.getTaskId();
-        long projectId = taskDTO.getProjectId();
-        long creatorId = taskDTO.getCreatorId();
-        long assigneeId = taskDTO.getAssigneeId();
-        return taskService.taskAssign(taskId, projectId , creatorId , assigneeId);
+    public String addTask(@RequestBody TaskDTO taskDTO) {
+        return taskService.addTask(taskDTO);
     }
 
 }

@@ -1,7 +1,6 @@
 package com.zerp.taskmanagement.taskcontroller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +32,7 @@ public class UserController {
     }
 
     @GetMapping("/user/{userId}")
-    public Optional<User> getUserById(@PathVariable long userId) {
+    public User getUserById(@PathVariable long userId) {
         return userService.findByUserId(userId);
     }
 
