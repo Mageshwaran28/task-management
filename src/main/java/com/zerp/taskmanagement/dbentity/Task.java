@@ -1,8 +1,13 @@
 package com.zerp.taskmanagement.dbentity;
 
 
+import com.zerp.taskmanagement.myenum.Priority;
+import com.zerp.taskmanagement.myenum.Status;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,14 +17,19 @@ import jakarta.persistence.ManyToOne;
 @Entity
 public class Task {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long taskId;
     private String taskTitle;
     private String taskDescription;
     private String dueDate;
-    private String priority;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @ManyToOne(cascade =  CascadeType.ALL)
     @JoinColumn(name = "creator_id" , referencedColumnName = "UserId")
@@ -65,19 +75,19 @@ public class Task {
         this.dueDate = dueDate;
     }
 
-    public String getPriority() {
+    public Priority getPriority() {
         return priority;
     }
 
-    public void setPriority(String priority) {
+    public void setPriority(Priority priority) {
         this.priority = priority;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
@@ -105,5 +115,4 @@ public class Task {
         this.assignee = assignee;
     }
 
-    
 }
