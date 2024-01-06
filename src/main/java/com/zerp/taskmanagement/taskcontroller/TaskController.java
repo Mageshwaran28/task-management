@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,6 +49,11 @@ public class TaskController {
     @PostMapping("/task/add")
     public String addTask(@RequestBody TaskDTO taskDTO) {
         return taskService.addTask(taskDTO);
+    }
+
+    @PutMapping("/task/{taskId}")
+    public String updateTask(@PathVariable long taskId, @RequestBody TaskDTO taskDTO) {
+        return taskService.updateTask(taskId, taskDTO);
     }
 
 }
