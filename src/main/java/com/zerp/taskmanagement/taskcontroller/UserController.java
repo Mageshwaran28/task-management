@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,5 +36,16 @@ public class UserController {
     public User getUserById(@PathVariable long userId) {
         return userService.findByUserId(userId);
     }
+
+    @PutMapping("/user/{userId}")
+    public String updateUser(@PathVariable long userId, @RequestBody User user){
+        return userService.updateUser(user , userId);
+    }
+
+    @PutMapping("/user/{userId}/{currentPassword}/{newPassword}")
+    public String changeUserPassword(@PathVariable long userId , @PathVariable String currentPassword , @PathVariable String newPassword){
+        return userService.changeUserPassword(userId, currentPassword , newPassword);
+    }
+
 
 }

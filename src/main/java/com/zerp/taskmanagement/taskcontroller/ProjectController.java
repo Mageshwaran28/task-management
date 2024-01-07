@@ -3,10 +3,10 @@ package com.zerp.taskmanagement.taskcontroller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,8 +32,13 @@ public class ProjectController {
     }
 
     @PostMapping("/project/add")
-    public ResponseEntity<String> addProject(@RequestBody Project project) {
+    public String addProject(@RequestBody Project project) {
         return projectService.addProject(project);
+    }
+
+    @PutMapping("/project/{projectId}")
+    public String updateProject(@PathVariable long projectId, @RequestBody Project project) {
+        return projectService.updateProject(project, projectId);
     }
 
 }

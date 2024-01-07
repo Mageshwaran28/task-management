@@ -17,6 +17,8 @@ import com.zerp.taskmanagement.dto.TaskDTO;
 import com.zerp.taskmanagement.myenum.Priority;
 import com.zerp.taskmanagement.myenum.Status;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class TaskService {
 
@@ -129,7 +131,9 @@ public class TaskService {
     }
 
     public String updateTask(long taskId, TaskDTO taskDTO) {
+
         Task existingTask = taskRepository.findByTaskId(taskId);
+
         if (taskDTO.getCreatorId() != 0 || taskDTO.getAssigneeId() != 0) {
             if (validateCreatorAndAssignee(taskDTO)) {
                 throw new InvalidInputException("601", "Invalid creator or assignee input , please check your input");
@@ -142,14 +146,19 @@ public class TaskService {
 
         if (taskDTO.getTaskTitle() != null && taskDTO.getTaskTitle().length() != 0)
             existingTask.setTaskTitle(taskDTO.getTaskTitle());
+
         if (taskDTO.getTaskDescription() != null && taskDTO.getTaskDescription().length() != 0)
             existingTask.setTaskDescription(taskDTO.getTaskDescription());
+
         if (taskDTO.getPriority() != null)
             existingTask.setPriority(taskDTO.getPriority());
+
         if (taskDTO.getDueDate() != null && taskDTO.getDueDate().length() != 0)
             existingTask.setDueDate(taskDTO.getDueDate());
+
         if (taskDTO.getStatus() != null)
             existingTask.setStatus(taskDTO.getStatus());
+
         if (taskDTO.getCreatorId() != 0) {
             User creator = userRepository.findById(taskDTO.getCreatorId()).get();
             existingTask.setCreator(creator);
@@ -165,5 +174,15 @@ public class TaskService {
 
         taskRepository.save(existingTask);
         return "Updated";
+    }
+
+    public String deleteTask(long taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new EntityNotFoundException("Task not found"));
+        task.getCreator().getCreatorTasks().remove(task);
+        task.getAssignee().getAssigneeTasks().remove(task);
+        task.getProject().getProjectTasks().remove(task);
+        taskRepository.delete(task);
+        return "Successsfully deleted";
     }
 }

@@ -67,4 +67,50 @@ public class UserService {
         return user;
     }
 
+    public String updateUser(User user, long userId) {
+
+        User existUser = userRepository.findByUserId(userId);
+
+        if (userRepository.findByUserName(user.getUserName()) != null) {
+            throw new InvalidInputException("601", "This user already exists , please choose another user name");
+
+        } else if (user.getMobileNumber() != 0 && Long.toString(user.getMobileNumber()).length() != 10) {
+
+            throw new InvalidInputException("601", "Input field is invalid , Please look into it");
+        }
+
+        if (user.getUserName() != null) {
+            existUser.setUserName(user.getUserName());
+        }
+        if (user.getMobileNumber() != 0) {
+            existUser.setMobileNumber(user.getMobileNumber());
+        }
+        if (user.getEmployeeRole() != null) {
+            existUser.setEmployeeRole(user.getEmployeeRole());
+        }
+
+        userRepository.save(existUser);
+
+        return "Updated";
+    }
+
+    public String changeUserPassword(long userId, String currentPassword, String newPassword) {
+
+        User user = userRepository.findByUserId(userId);
+        if (user == null) {
+            throw new NoSuchElementException("No value is present in database , Please change your request");
+        }
+        if (user.getPassword().equals(currentPassword)) {
+            user.setPassword(newPassword);
+        } else if (newPassword.length() < 6) {
+            throw new InvalidInputException("601", "passeord length is minimum 6 characters");
+        } else {
+            throw new InvalidInputException("601", "Passwords do not match , enter valid password");
+        }
+
+        userRepository.save(user);
+
+        return "Successfully changed";
+    }
+
 }

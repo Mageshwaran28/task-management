@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.zerp.taskmanagement.dbentity.Project;
@@ -27,9 +25,9 @@ public class ProjectService {
         return projects;
     }
 
-    public ResponseEntity<String> addProject(Project project) {
+    public String addProject(Project project) {
             projectRepository.save(project);
-            return new ResponseEntity<>("success", HttpStatus.CREATED);
+            return "success";
     }
 
     public Project findByprojectId(long projectId) {
@@ -40,5 +38,27 @@ public class ProjectService {
         }
 
         return project;
+    }
+
+    public String updateProject(Project project, long projectId) {
+
+        Project existProject = projectRepository.findByProjectId(projectId);
+
+        if(project.getProjectName()!=null && existProject.getProjectName().length()!=0){
+            existProject.setProjectName(project.getProjectName());
+        }
+        if(project.getProjectDescription()!=null && existProject.getProjectDescription().length()!=0){
+            existProject.setProjectDescription(project.getProjectDescription());
+        }
+        if(project.getStartDate()!=null && existProject.getStartDate().length() !=0){
+            existProject.setStartDate(project.getStartDate());
+        }
+        if(project.getEndDate()!=null && existProject.getEndDate().length() !=0){
+            existProject.setEndDate(project.getEndDate());
+        }
+
+        projectRepository.save(existProject);
+
+        return "Updated";
     }
 }

@@ -3,6 +3,7 @@ package com.zerp.taskmanagement.taskcontroller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,6 +55,11 @@ public class TaskController {
     @PutMapping("/task/{taskId}")
     public String updateTask(@PathVariable long taskId, @RequestBody TaskDTO taskDTO) {
         return taskService.updateTask(taskId, taskDTO);
+    }
+
+    @DeleteMapping("/task/{taskId}")
+    public String deleteTask(@PathVariable long taskId) {
+        return taskService.deleteTask(taskId);
     }
 
 }

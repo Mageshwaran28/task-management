@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,13 +24,13 @@ public class User {
     private String employeeRole;
     private String userName;
     private String password;
-    
+
     @JsonIgnore
-    @OneToMany(mappedBy = "creator")
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
     public Set<Task> creatorTask = new HashSet<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "assignee")
+    @OneToMany(mappedBy = "assignee", cascade = CascadeType.ALL, orphanRemoval = true)
     public Set<Task> assigneTask = new HashSet<>();
 
     public long getUserId() {
@@ -96,5 +97,12 @@ public class User {
         this.assigneTask = assigneTask;
     }
 
+    public Set<Task> getCreatorTasks() {
+        return creatorTask;
+    }
+
+    public Set<Task> getAssigneeTasks() {
+        return assigneTask;
+    }
 
 }
