@@ -31,15 +31,15 @@ public class Task {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @ManyToOne(cascade =  CascadeType.ALL)
+    @ManyToOne(cascade =  CascadeType.DETACH)
     @JoinColumn(name = "creator_id" , referencedColumnName = "UserId")
     public User creator;
 
-    @ManyToOne(cascade =  CascadeType.ALL)
+    @ManyToOne(cascade =  CascadeType.DETACH)
     @JoinColumn(name = "assignee_id" , referencedColumnName = "UserId")
     public User assignee;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "project_id", referencedColumnName = "projectId")
     public Project project;
 

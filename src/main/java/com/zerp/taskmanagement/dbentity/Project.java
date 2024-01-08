@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,7 +26,7 @@ public class Project {
     private String endDate;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "project")
+    @OneToMany(mappedBy = "project" , cascade =  CascadeType.ALL)
     public Set<Task> tasks = new HashSet<>();
 
     public long getProjectId() {
@@ -64,9 +65,5 @@ public class Project {
     public void setTasks(Set<Task> tasks) {
         this.tasks = tasks;
     }
-
-    // public Set<Task> getProjectTasks() {
-    //     return tasks;
-    // }
     
 }

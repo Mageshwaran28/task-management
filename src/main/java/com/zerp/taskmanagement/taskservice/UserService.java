@@ -10,6 +10,8 @@ import com.zerp.taskmanagement.customexception.EmptyInputException;
 import com.zerp.taskmanagement.customexception.InvalidInputException;
 import com.zerp.taskmanagement.dbentity.User;
 import com.zerp.taskmanagement.dbrepository.UserRepository;
+import com.zerp.taskmanagement.dto.ChangePasswordDTO;
+import com.zerp.taskmanagement.dto.UpdateUserDTO;
 
 @Service
 public class UserService {
@@ -67,7 +69,7 @@ public class UserService {
         return user;
     }
 
-    public String updateUser(User user, long userId) {
+    public String updateUser(UpdateUserDTO user, long userId) {
 
         User existUser = userRepository.findByUserId(userId);
 
@@ -94,16 +96,16 @@ public class UserService {
         return "Updated";
     }
 
-    public String changeUserPassword(long userId, String currentPassword, String newPassword) {
+    public String changeUserPassword(long userId, ChangePasswordDTO changePassword) {
 
         User user = userRepository.findByUserId(userId);
         if (user == null) {
             throw new NoSuchElementException("No value is present in database , Please change your request");
         }
-        if (user.getPassword().equals(currentPassword)) {
-            user.setPassword(newPassword);
-        } else if (newPassword.length() < 6) {
-            throw new InvalidInputException("601", "passeord length is minimum 6 characters");
+        if (user.getPassword().equals(changePassword.getCurrentPassword()) && changePassword.getNewPassword().length()>6) {
+            user.setPassword(changePassword.getNewPassword());
+        } else if (changePassword.getNewPassword().length() < 6) {
+            throw new InvalidInputException("601", "Password length is minimum 6 characters");
         } else {
             throw new InvalidInputException("601", "Passwords do not match , enter valid password");
         }

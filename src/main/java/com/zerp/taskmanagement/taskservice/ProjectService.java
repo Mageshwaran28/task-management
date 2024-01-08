@@ -16,25 +16,25 @@ public class ProjectService {
     ProjectRepository projectRepository;
 
     public List<Project> getProjects() {
-       List<Project> projects = projectRepository.findAll();
-        
-        if(projects.size() == 0) {
-            throw new NoSuchElementException("No value is present in database , Please change your request" );
+        List<Project> projects = projectRepository.findAll();
+
+        if (projects.size() == 0) {
+            throw new NoSuchElementException("No value is present in database , Please change your request");
         }
 
         return projects;
     }
 
     public String addProject(Project project) {
-            projectRepository.save(project);
-            return "success";
+        projectRepository.save(project);
+        return "success";
     }
 
     public Project findByprojectId(long projectId) {
-        Project project =  projectRepository.findByProjectId(projectId);
-        
-        if(project == null) {
-            throw new NoSuchElementException("No value is present in database , Please change your request" );
+        Project project = projectRepository.findByProjectId(projectId);
+
+        if (project == null) {
+            throw new NoSuchElementException("No value is present in database , Please change your request");
         }
 
         return project;
@@ -44,16 +44,16 @@ public class ProjectService {
 
         Project existProject = projectRepository.findByProjectId(projectId);
 
-        if(project.getProjectName()!=null && existProject.getProjectName().length()!=0){
+        if (project.getProjectName() != null && existProject.getProjectName().length() != 0) {
             existProject.setProjectName(project.getProjectName());
         }
-        if(project.getProjectDescription()!=null && existProject.getProjectDescription().length()!=0){
+        if (project.getProjectDescription() != null && existProject.getProjectDescription().length() != 0) {
             existProject.setProjectDescription(project.getProjectDescription());
         }
-        if(project.getStartDate()!=null && existProject.getStartDate().length() !=0){
+        if (project.getStartDate() != null && existProject.getStartDate().length() != 0) {
             existProject.setStartDate(project.getStartDate());
         }
-        if(project.getEndDate()!=null && existProject.getEndDate().length() !=0){
+        if (project.getEndDate() != null && existProject.getEndDate().length() != 0) {
             existProject.setEndDate(project.getEndDate());
         }
 

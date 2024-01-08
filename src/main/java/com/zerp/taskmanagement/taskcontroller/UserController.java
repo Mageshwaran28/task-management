@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zerp.taskmanagement.dbentity.User;
+import com.zerp.taskmanagement.dto.ChangePasswordDTO;
+import com.zerp.taskmanagement.dto.UpdateUserDTO;
 import com.zerp.taskmanagement.taskservice.UserService;
 
 
@@ -38,13 +40,13 @@ public class UserController {
     }
 
     @PutMapping("/user/{userId}")
-    public String updateUser(@PathVariable long userId, @RequestBody User user){
+    public String updateUser(@PathVariable long userId, @RequestBody UpdateUserDTO user){
         return userService.updateUser(user , userId);
     }
 
-    @PutMapping("/user/{userId}/{currentPassword}/{newPassword}")
-    public String changeUserPassword(@PathVariable long userId , @PathVariable String currentPassword , @PathVariable String newPassword){
-        return userService.changeUserPassword(userId, currentPassword , newPassword);
+    @PutMapping("/user/changepassword/{userId}")
+    public String changeUserPassword(@PathVariable long userId , @RequestBody ChangePasswordDTO changePasswordDTO){
+        return userService.changeUserPassword(userId, changePasswordDTO);
     }
 
 
