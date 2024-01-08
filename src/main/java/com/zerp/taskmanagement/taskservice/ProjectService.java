@@ -50,10 +50,10 @@ public class ProjectService {
         if (project.getProjectDescription() != null && existProject.getProjectDescription().length() != 0) {
             existProject.setProjectDescription(project.getProjectDescription());
         }
-        if (project.getStartDate() != null && existProject.getStartDate().length() != 0) {
+        if (project.getStartDate() != null) {
             existProject.setStartDate(project.getStartDate());
         }
-        if (project.getEndDate() != null && existProject.getEndDate().length() != 0) {
+        if (project.getEndDate() != null) {
             existProject.setEndDate(project.getEndDate());
         }
 

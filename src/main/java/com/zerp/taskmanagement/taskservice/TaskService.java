@@ -1,5 +1,6 @@
 package com.zerp.taskmanagement.taskservice;
 
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -100,7 +101,7 @@ public class TaskService {
                 taskDTO.getTaskTitle().length() == 0 ||
                 taskDTO.getTaskDescription().isEmpty() ||
                 taskDTO.getTaskDescription().length() == 0 ||
-                taskDTO.getDueDate().isEmpty()) {
+                taskDTO.getDueDate()==null) {
             return true;
         }
         return false;
@@ -153,7 +154,7 @@ public class TaskService {
         if (taskDTO.getPriority() != null)
             existingTask.setPriority(taskDTO.getPriority());
 
-        if (taskDTO.getDueDate() != null && taskDTO.getDueDate().length() != 0)
+        if (taskDTO.getDueDate() != null)
             existingTask.setDueDate(taskDTO.getDueDate());
 
         if (taskDTO.getStatus() != null)
@@ -184,5 +185,10 @@ public class TaskService {
         task.getProject().getTasks().remove(task);
         taskRepository.delete(task);
         return "Successsfully deleted";
+    }
+
+    public List<Task> findByDuedate() {
+        Date date = new Date();
+        return taskRepository.findByDueDateBefore(date);
     }
 }

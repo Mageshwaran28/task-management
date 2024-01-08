@@ -1,6 +1,8 @@
 package com.zerp.taskmanagement.dbentity;
 
 
+import java.util.Date;
+
 import com.zerp.taskmanagement.myenum.Priority;
 import com.zerp.taskmanagement.myenum.Status;
 
@@ -23,7 +25,7 @@ public class Task {
     private long taskId;
     private String taskTitle;
     private String taskDescription;
-    private String dueDate;
+    private Date dueDate;
 
     @Enumerated(EnumType.STRING)
     private Priority priority;
@@ -67,11 +69,11 @@ public class Task {
         this.taskDescription = taskDescription;
     }
 
-    public String getDueDate() {
+    public Date getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(String dueDate) {
+    public void setDueDate(Date dueDate) {
         this.dueDate = dueDate;
     }
 

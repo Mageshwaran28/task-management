@@ -1,5 +1,7 @@
 package com.zerp.taskmanagement.dto;
 
+import java.util.Date;
+
 import com.zerp.taskmanagement.myenum.Priority;
 import com.zerp.taskmanagement.myenum.Status;
 
@@ -7,7 +9,7 @@ public class TaskDTO {
     private long taskId;
     private String taskTitle;
     private String taskDescription;
-    private String dueDate;
+    private Date dueDate;
     private Priority priority;
     private Status status;
     private long projectId;
@@ -51,10 +53,10 @@ public class TaskDTO {
     public void setTaskDescription(String taskDescription) {
         this.taskDescription = taskDescription;
     }
-    public String getDueDate() {
+    public Date getDueDate() {
         return dueDate;
     }
-    public void setDueDate(String dueDate) {
+    public void setDueDate(Date dueDate) {
         this.dueDate = dueDate;
     }
     public Priority getPriority() {

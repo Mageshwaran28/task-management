@@ -19,11 +19,17 @@ import com.zerp.taskmanagement.myenum.Status;
 import com.zerp.taskmanagement.taskservice.TaskService;
 
 @RestController
-@RequestMapping("/taskmanagement/")
+@RequestMapping("/taskmanagement")
 public class TaskController {
 
     @Autowired
     TaskService taskService;
+
+    @RequestMapping("/")
+    public String home(){
+        return "index";
+    }
+
 
     @GetMapping("/tasks")
     public List<Task> getAllTasks() {
@@ -40,6 +46,11 @@ public class TaskController {
     public List<Task> getTasksByStatus(@PathVariable String statusId) {
         Status status = Status.fromString(statusId);
         return taskService.findByStatus(status);
+    }
+
+    @GetMapping("/tasks/due")
+    public List<Task> getTasksByDue(){
+        return taskService.findByDuedate();
     }
 
     @GetMapping("/task/{taskId}")

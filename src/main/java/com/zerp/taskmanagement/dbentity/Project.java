@@ -2,6 +2,7 @@ package com.zerp.taskmanagement.dbentity;
 
 
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,8 +23,8 @@ public class Project {
     private long projectId;
     private String projectName;
     private String projectDescription;
-    private String startDate;
-    private String endDate;
+    private Date startDate;
+    private Date endDate;
 
     @JsonIgnore
     @OneToMany(mappedBy = "project" , cascade =  CascadeType.ALL)
@@ -47,16 +48,16 @@ public class Project {
     public void setProjectDescription(String projectDescription) {
         this.projectDescription = projectDescription;
     }
-    public String getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
-    public void setStartDate(String startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
-    public String getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
-    public void setEndDate(String endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
     public Set<Task> getTasks() {

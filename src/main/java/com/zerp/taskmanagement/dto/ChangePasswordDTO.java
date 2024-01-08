@@ -17,6 +17,4 @@ public class ChangePasswordDTO {
     public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
     }
-
-    
 }

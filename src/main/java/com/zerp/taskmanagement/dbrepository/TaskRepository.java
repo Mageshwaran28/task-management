@@ -1,5 +1,6 @@
 package com.zerp.taskmanagement.dbrepository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,5 +18,7 @@ public interface TaskRepository extends JpaRepository<Task , Long> {
     Task findByTaskId(long taskId);
 
     List<Task> findByStatus(Status status);
+
+    List<Task> findByDueDateBefore(Date date);
 
 }
