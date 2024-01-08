@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.zerp.taskmanagement.customexception.EmptyInputException;
 import com.zerp.taskmanagement.customexception.InvalidInputException;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @ControllerAdvice
 public class MyControllerAdvice {
     
@@ -38,6 +40,11 @@ public class MyControllerAdvice {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<String> handleMEntityNotSupportedException(HttpRequestMethodNotSupportedException resolverException){
         return new ResponseEntity<>("The requested method is not supported , please check the requested method" , HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException entityNotFoundException){
+        return new ResponseEntity<>("The requested entity is not found , please check the requested entity" , HttpStatus.NOT_FOUND);
     }
 
 }
