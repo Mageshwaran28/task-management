@@ -65,8 +65,8 @@ public class Project {
         this.tasks = tasks;
     }
 
-    public Set<Task> getProjectTasks() {
-        return tasks;
-    }
+    // public Set<Task> getProjectTasks() {
+    //     return tasks;
+    // }
     
 }

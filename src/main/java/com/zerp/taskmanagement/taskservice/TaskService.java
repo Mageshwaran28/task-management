@@ -179,9 +179,9 @@ public class TaskService {
     public String deleteTask(long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Task not found"));
-        task.getCreator().getCreatorTasks().remove(task);
-        task.getAssignee().getAssigneeTasks().remove(task);
-        task.getProject().getProjectTasks().remove(task);
+        task.getCreator().getCreatorTask().remove(task);
+        task.getAssignee().getAssigneTask().remove(task);
+        task.getProject().getTasks().remove(task);
         taskRepository.delete(task);
         return "Successsfully deleted";
     }

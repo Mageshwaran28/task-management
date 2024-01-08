@@ -96,13 +96,4 @@ public class User {
     public void setAssigneTask(Set<Task> assigneTask) {
         this.assigneTask = assigneTask;
     }
-
-    public Set<Task> getCreatorTasks() {
-        return creatorTask;
-    }
-
-    public Set<Task> getAssigneeTasks() {
-        return assigneTask;
-    }
-
 }
