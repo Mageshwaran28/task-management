@@ -1,8 +1,6 @@
 package com.zerp.taskmanagement.customexception;
 
-import org.springframework.stereotype.Component;
 
-@Component
 public class InvalidInputException extends RuntimeException {
  
     private String errorCode;
