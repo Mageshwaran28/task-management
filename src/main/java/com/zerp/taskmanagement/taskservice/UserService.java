@@ -20,8 +20,8 @@ public class UserService {
     UserRepository userRepository;
 
     public String addUser(User user) {
-        if (user.getUserName().isEmpty() ||
-                user.getUserName().length() == 0 ||
+        if (user.getUsername().isEmpty() ||
+                user.getUsername().length() == 0 ||
                 user.getEmployeeName().isEmpty() ||
                 user.getEmployeeName().length() == 0 ||
                 user.getEmployeeRole().isEmpty() ||
@@ -38,7 +38,7 @@ public class UserService {
 
             throw new InvalidInputException("601", "Input field is invalid , Please look into it");
 
-        } else if (userRepository.findByUserName(user.getUserName()) != null) {
+        } else if (userRepository.findByUsername(user.getUsername()) != null) {
 
             throw new InvalidInputException("601", "This user already exists , please choose another user name");
 
@@ -73,7 +73,7 @@ public class UserService {
 
         User existUser = userRepository.findByUserId(userId);
 
-        if (userRepository.findByUserName(user.getUserName()) != null) {
+        if (userRepository.findByUsername(user.getUserName()) != null) {
             throw new InvalidInputException("601", "This user already exists , please choose another user name");
 
         } else if (user.getMobileNumber() != 0 && Long.toString(user.getMobileNumber()).length() != 10) {

@@ -1,7 +1,12 @@
 package com.zerp.taskmanagement.dbentity;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -12,7 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
 @Entity
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +26,7 @@ public class User {
 
     private long mobileNumber;
     private String employeeRole;
-    private String userName;
+    private String username;
     private String password;
 
     @JsonIgnore
@@ -31,6 +36,17 @@ public class User {
     @JsonIgnore
     @OneToMany(mappedBy = "assignee")
     public Set<Task> assigneTask = new HashSet<>();
+
+
+    
+
+    public User(String employeeName, long mobileNumber, String employeeRole, String username, String password) {
+        this.employeeName = employeeName;
+        this.mobileNumber = mobileNumber;
+        this.employeeRole = employeeRole;
+        this.username = username;
+        this.password = password;
+    }
 
     public long getUserId() {
         return userId;
@@ -64,14 +80,7 @@ public class User {
         this.employeeRole = employeeRole;
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
+    @Override
     public String getPassword() {
         return password;
     }
@@ -94,5 +103,40 @@ public class User {
 
     public void setAssigneTask(Set<Task> assigneTask) {
         this.assigneTask = assigneTask;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+       return List.of(()->employeeRole);
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+        
+    public void setUserName(String username) {
+        this.username = username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
