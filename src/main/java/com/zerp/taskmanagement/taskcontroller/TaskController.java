@@ -25,12 +25,6 @@ public class TaskController {
     @Autowired
     TaskService taskService;
 
-    @RequestMapping("/")
-    public String home(){
-        return "index";
-    }
-
-
     @GetMapping("/tasks")
     public List<Task> getAllTasks() {
         return taskService.findAll();

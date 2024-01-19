@@ -45,13 +45,10 @@ public class TaskService {
 
     public String addTask(TaskDTO taskDTO) {
         Task task = new Task();
-        if (validateTask(taskDTO)) {
-            throw new InvalidInputException("601", "Inavalid input task , please check your input");
-        } else if (validateCreatorAndAssignee(taskDTO)) {
-            throw new InvalidInputException("601", "Invalid creator or assignee input , please check your input");
-        } else if (validateProject(taskDTO)) {
-            throw new InvalidInputException("601", "Invalid project input , please check your input");
-        }
+        isValidateTask(taskDTO);
+        isValidDueDate(taskDTO.getDueDate());
+        isValidateCreatorAndAssignee(taskDTO);
+        isValidateProject(taskDTO);
 
         task.setTaskId(taskDTO.getTaskId());
         task.setTaskTitle(taskDTO.getTaskTitle());
@@ -74,37 +71,45 @@ public class TaskService {
         return task;
     }
 
-    private boolean validateProject(TaskDTO taskDTO) {
+    private boolean isValidateProject(TaskDTO taskDTO) {
         Project project = projectRepository.findByProjectId(taskDTO.getProjectId());
         if (project == null) {
-            return true;
+            throw new InvalidInputException("601", "Invalid project input , please check your input");
         }
 
-        return false;
+        return true;
     }
 
-    private boolean validateCreatorAndAssignee(TaskDTO taskDTO) {
+    private boolean isValidateCreatorAndAssignee(TaskDTO taskDTO) {
         User creator = userRepository.findByUserId(taskDTO.getCreatorId());
         User assignee = userRepository.findByUserId(taskDTO.getAssigneeId());
         if (creator == null || assignee == null) {
-            return true;
+            throw new InvalidInputException("601", "Invalid creator or assignee input , please check your input");
+
         } else if (taskDTO.getCreatorId() == taskDTO.getAssigneeId()) {
-            return true;
+            throw new InvalidInputException("601", "Invalid creator or assignee input , please check your input");
         }
 
-        return false;
+        return true;
     }
 
-    private boolean validateTask(TaskDTO taskDTO) {
+    private boolean isValidateTask(TaskDTO taskDTO) {
 
         if (taskDTO.getTaskTitle().isEmpty() ||
                 taskDTO.getTaskTitle().length() == 0 ||
                 taskDTO.getTaskDescription().isEmpty() ||
-                taskDTO.getTaskDescription().length() == 0 ||
-                taskDTO.getDueDate()==null) {
-            return true;
+                taskDTO.getTaskDescription().length() == 0) {
+            throw new InvalidInputException("601", "Inavalid input task , please check your input");
         }
-        return false;
+        return true;
+    }
+
+    private boolean isValidDueDate(Date dueDate) {
+        if (!(dueDate != null && dueDate.after(new Date()))) {
+            throw new InvalidInputException("601", "Inavalid due date , please check your input");
+        }
+        return true;
+
     }
 
     public Task findByTaskId(long taskId) {
@@ -135,14 +140,11 @@ public class TaskService {
 
         Task existingTask = taskRepository.findByTaskId(taskId);
 
-        if (taskDTO.getCreatorId() != 0 || taskDTO.getAssigneeId() != 0) {
-            if (validateCreatorAndAssignee(taskDTO)) {
-                throw new InvalidInputException("601", "Invalid creator or assignee input , please check your input");
-            }
-        } else if (taskDTO.getProjectId() != 0) {
-            if (validateProject(taskDTO)) {
-                throw new InvalidInputException("601", "Invalid project input , please check your input");
-            }
+        if (taskDTO.getCreatorId() == 0) {
+            taskDTO.setCreatorId(existingTask.getCreator().getUserId());
+        }
+        if (taskDTO.getAssigneeId() == 0) {
+            taskDTO.setAssigneeId(existingTask.getAssignee().getUserId());
         }
 
         if (taskDTO.getTaskTitle() != null && taskDTO.getTaskTitle().length() != 0)
@@ -151,26 +153,23 @@ public class TaskService {
         if (taskDTO.getTaskDescription() != null && taskDTO.getTaskDescription().length() != 0)
             existingTask.setTaskDescription(taskDTO.getTaskDescription());
 
-        if (taskDTO.getPriority() != null)
-            existingTask.setPriority(taskDTO.getPriority());
-
-        if (taskDTO.getDueDate() != null)
-            existingTask.setDueDate(taskDTO.getDueDate());
-
-        if (taskDTO.getStatus() != null)
-            existingTask.setStatus(taskDTO.getStatus());
-
-        if (taskDTO.getCreatorId() != 0) {
-            User creator = userRepository.findById(taskDTO.getCreatorId()).get();
-            existingTask.setCreator(creator);
-        }
-        if (taskDTO.getAssigneeId() != 0) {
-            User assignee = userRepository.findById(taskDTO.getAssigneeId()).get();
-            existingTask.setAssignee(assignee);
+        if (isValidateCreatorAndAssignee(taskDTO)) {
+            existingTask.setCreator(userRepository.findById(taskDTO.getCreatorId()).get());
+            existingTask.setAssignee(userRepository.findById(taskDTO.getAssigneeId()).get());
         }
         if (taskDTO.getProjectId() != 0) {
-            Project project = projectRepository.findById(taskDTO.getProjectId()).get();
-            existingTask.setProject(project);
+            isValidateProject(taskDTO);
+            existingTask.setProject(projectRepository.findById(taskDTO.getProjectId()).get());
+        }
+        if (taskDTO.getDueDate() != null) {
+            isValidDueDate(taskDTO.getDueDate());
+            existingTask.setDueDate(taskDTO.getDueDate());
+        }
+        if (taskDTO.getPriority() != null) {
+            existingTask.setPriority(taskDTO.getPriority());
+        }
+        if (taskDTO.getStatus() != null) {
+            existingTask.setStatus(taskDTO.getStatus());
         }
 
         taskRepository.save(existingTask);
@@ -189,6 +188,12 @@ public class TaskService {
 
     public List<Task> findByDuedate() {
         Date date = new Date();
-        return taskRepository.findByDueDateBefore(date);
+        List<Task> tasks = taskRepository.findByDueDateBefore(date);
+
+        if (tasks.size() == 0) {
+            throw new NoSuchElementException("No value is present in database , Please change your request");
+        }
+
+        return tasks;
     }
 }
