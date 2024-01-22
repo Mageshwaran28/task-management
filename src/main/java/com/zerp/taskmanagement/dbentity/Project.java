@@ -1,70 +1,52 @@
 package com.zerp.taskmanagement.dbentity;
 
-
-
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "projects")
 public class Project {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long projectId;
-    private String projectName;
-    private String projectDescription;
-    private Date startDate;
-    private Date endDate;
+    private long id;
+    private String name;
+    private String description;
+    private long creatorId;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "project" , cascade =  CascadeType.ALL)
-    public Set<Task> tasks = new HashSet<>();
+    public long getId() {
+        return id;
+    }
 
-    public long getProjectId() {
-        return projectId;
+    public void setId(long id) {
+        this.id = id;
     }
-    public void setProjectId(long projectId) {
-        this.projectId = projectId;
+
+    public String getName() {
+        return name;
     }
-    public String getProjectName() {
-        return projectName;
+
+    public void setName(String name) {
+        this.name = name;
     }
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
+
+    public String getDescription() {
+        return description;
     }
-    public String getProjectDescription() {
-        return projectDescription;
+
+    public void setDescription(String description) {
+        this.description = description;
     }
-    public void setProjectDescription(String projectDescription) {
-        this.projectDescription = projectDescription;
+
+    public long getCreatorId() {
+        return creatorId;
     }
-    public Date getStartDate() {
-        return startDate;
+
+    public void setCreatorId(long creatorId) {
+        this.creatorId = creatorId;
     }
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-    public Date getEndDate() {
-        return endDate;
-    }
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
-    }
-    public Set<Task> getTasks() {
-        return tasks;
-    }
-    public void setTasks(Set<Task> tasks) {
-        this.tasks = tasks;
-    }
-    
+
 }

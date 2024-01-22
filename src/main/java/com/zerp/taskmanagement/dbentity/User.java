@@ -1,69 +1,44 @@
 package com.zerp.taskmanagement.dbentity;
 
-import java.util.HashSet;
-import java.util.Set;
-
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
-public class User  {
+@Table(name = "users")
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long userId;
-    private String employeeName;
-
-    private long mobileNumber;
-    private String employeeRole;
-    private String userName;
+    private long id;
+    private String email;
+    private String roleId;
     private String password;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "creator")
-    public Set<Task> creatorTask = new HashSet<>();
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "assignee")
-    public Set<Task> assigneTask = new HashSet<>();
-
-
-    public long getUserId() {
-        return userId;
+    public long getId() {
+        return id;
     }
 
-    public void setUserId(long userId) {
-        this.userId = userId;
+    public void setId(long id) {
+        this.id = id;
     }
 
-    public String getEmployeeName() {
-        return employeeName;
+    public String getEmail() {
+        return email;
     }
 
-    public void setEmployeeName(String employeeName) {
-        this.employeeName = employeeName;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public long getMobileNumber() {
-        return mobileNumber;
+    public String getRoleId() {
+        return roleId;
     }
 
-    public void setMobileNumber(long mobileNumber) {
-        this.mobileNumber = mobileNumber;
-    }
-
-    public String getEmployeeRole() {
-        return employeeRole;
-    }
-
-    public void setEmployeeRole(String employeeRole) {
-        this.employeeRole = employeeRole;
+    public void setRoleId(String roleId) {
+        this.roleId = roleId;
     }
 
     public String getPassword() {
@@ -74,28 +49,4 @@ public class User  {
         this.password = password;
     }
 
-    public Set<Task> getCreatorTask() {
-        return creatorTask;
-    }
-
-    public void setCreatorTask(Set<Task> creatorTask) {
-        this.creatorTask = creatorTask;
-    }
-
-    public Set<Task> getAssigneTask() {
-        return assigneTask;
-    }
-
-    public void setAssigneTask(Set<Task> assigneTask) {
-        this.assigneTask = assigneTask;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-        
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
 }

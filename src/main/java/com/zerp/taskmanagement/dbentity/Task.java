@@ -1,31 +1,26 @@
 package com.zerp.taskmanagement.dbentity;
 
-
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.zerp.taskmanagement.myenum.Priority;
 import com.zerp.taskmanagement.myenum.Status;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Task {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long taskId;
-    private String taskTitle;
-    private String taskDescription;
-    private Date dueDate;
+    private long id;
+    private String name;
+    private String description;
 
     @Enumerated(EnumType.STRING)
     private Priority priority;
@@ -33,48 +28,35 @@ public class Task {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @ManyToOne(cascade =  CascadeType.DETACH)
-    @JoinColumn(name = "creator_id" , referencedColumnName = "UserId")
-    public User creator;
+    private long creatorId;
+    private LocalDateTime createdAt;
+    private LocalDate startDate;
+    private LocalDate dueDate;
+    private long parentTaskId;
+    private int depth;
 
-    @ManyToOne(cascade =  CascadeType.DETACH)
-    @JoinColumn(name = "assignee_id" , referencedColumnName = "UserId")
-    public User assignee;
-
-    @ManyToOne(cascade = CascadeType.DETACH)
-    @JoinColumn(name = "project_id", referencedColumnName = "projectId")
-    public Project project;
-
-    public long getTaskId() {
-        return taskId;
+    public long getId() {
+        return id;
     }
 
-    public void setTaskId(long taskId) {
-        this.taskId = taskId;
+    public void setId(long id) {
+        this.id = id;
     }
 
-    public String getTaskTitle() {
-        return taskTitle;
+    public String getName() {
+        return name;
     }
 
-    public void setTaskTitle(String taskTitle) {
-        this.taskTitle = taskTitle;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getTaskDescription() {
-        return taskDescription;
+    public String getDescription() {
+        return description;
     }
 
-    public void setTaskDescription(String taskDescription) {
-        this.taskDescription = taskDescription;
-    }
-
-    public Date getDueDate() {
-        return dueDate;
-    }
-
-    public void setDueDate(Date dueDate) {
-        this.dueDate = dueDate;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Priority getPriority() {
@@ -93,28 +75,52 @@ public class Task {
         this.status = status;
     }
 
-    public Project getProject() {
-        return project;
+    public long getCreatorId() {
+        return creatorId;
     }
 
-    public void setProject(Project project) {
-        this.project = project;
+    public void setCreatorId(long creatorId) {
+        this.creatorId = creatorId;
     }
 
-    public User getCreator() {
-        return creator;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreator(User creator) {
-        this.creator = creator;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public User getAssignee() {
-        return assignee;
+    public LocalDate getStartDate() {
+        return startDate;
     }
 
-    public void setAssignee(User assignee) {
-        this.assignee = assignee;
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public long getParentTaskId() {
+        return parentTaskId;
+    }
+
+    public void setParentTaskId(long parentTaskId) {
+        this.parentTaskId = parentTaskId;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
     }
 
 }

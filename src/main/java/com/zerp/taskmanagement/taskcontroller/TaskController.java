@@ -19,7 +19,6 @@ import com.zerp.taskmanagement.myenum.Status;
 import com.zerp.taskmanagement.taskservice.TaskService;
 
 @RestController
-@RequestMapping("/taskmanagement")
 public class TaskController {
 
     @Autowired

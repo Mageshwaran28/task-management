@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zerp.taskmanagement.dbentity.User;
@@ -18,19 +17,18 @@ import com.zerp.taskmanagement.taskservice.UserService;
 
 
 @RestController
-@RequestMapping("taskmanagement/")
 public class UserController {
     
     @Autowired
     UserService userService;
 
-    @PostMapping("/user/add")
+    @PostMapping("/register")
     public String addTask(@RequestBody User user ){
         return userService.addUser(user);
     }
 
     @GetMapping("/users")
-    public List<User> geAlltUsers(){
+    public List<User> users(){
         return userService.findAll();
     }
 
