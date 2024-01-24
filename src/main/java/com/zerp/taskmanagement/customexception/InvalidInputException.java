@@ -3,15 +3,8 @@ package com.zerp.taskmanagement.customexception;
 
 public class InvalidInputException extends RuntimeException {
  
-    private String errorCode;
     private String errorMessage;
 
-    public String getErrorCode() {
-        return errorCode;
-    }
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
-    }
     public String getErrorMessage() {
         return errorMessage;
     }
@@ -19,9 +12,8 @@ public class InvalidInputException extends RuntimeException {
         this.errorMessage = errorMessage;
     }
     
-    public InvalidInputException(String errorCode, String errorMessage) {
+    public InvalidInputException(String errorMessage) {
         super();
-        this.errorCode = errorCode;
         this.errorMessage = errorMessage;
     }
 

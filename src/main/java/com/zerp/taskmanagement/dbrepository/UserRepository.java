@@ -8,8 +8,10 @@ import com.zerp.taskmanagement.dbentity.User;
 @Repository
 public interface UserRepository extends JpaRepository <User , Long>{
 
-    User findByUserId(long userId);
+    boolean existsByEmail(String email);
 
-    Object findByUserName(String userName);
+    User findByEmailIgnoreCase(String creator);
+
+    boolean existsByEmailIgnoreCase(String email);
 
 }

@@ -9,6 +9,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.zerp.taskmanagement.customexception.DuplicateInputException;
 import com.zerp.taskmanagement.customexception.EmptyInputException;
 import com.zerp.taskmanagement.customexception.InvalidInputException;
 
@@ -25,6 +26,11 @@ public class MyControllerAdvice {
     @ExceptionHandler(InvalidInputException.class)
     public ResponseEntity<String> handeInvalidInput(InvalidInputException invalidInput){
         return new ResponseEntity<>(invalidInput.getErrorMessage() , HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DuplicateInputException.class)
+    public ResponseEntity<String> handeDuplicateInput(DuplicateInputException duplicateInputException){
+        return new ResponseEntity<>(duplicateInputException.getErrorMessage() , HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NoSuchElementException.class)

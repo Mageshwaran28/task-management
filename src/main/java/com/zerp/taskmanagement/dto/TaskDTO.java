@@ -1,49 +1,37 @@
 package com.zerp.taskmanagement.dto;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import com.zerp.taskmanagement.myenum.Priority;
 import com.zerp.taskmanagement.myenum.Status;
 
 public class TaskDTO {
-    private long taskId;
-    private String taskTitle;
-    private String taskDescription;
-    private Date startDate;
-    private Date dueDate;
+    private String name;
+    private String description;
     private Priority priority;
     private Status status;
+    private LocalDateTime startDate;
+    private LocalDateTime dueDate;
+    private String creator;
+    private List<String> assignees;
+    private long projectId;
+    private long parentTaskId;
 
-    public long getTaskId() {
-        return taskId;
+    public String getName() {
+        return name;
     }
 
-    public void setTaskId(long taskId) {
-        this.taskId = taskId;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getTaskTitle() {
-        return taskTitle;
+    public String getDescription() {
+        return description;
     }
 
-    public void setTaskTitle(String taskTitle) {
-        this.taskTitle = taskTitle;
-    }
-
-    public String getTaskDescription() {
-        return taskDescription;
-    }
-
-    public void setTaskDescription(String taskDescription) {
-        this.taskDescription = taskDescription;
-    }
-
-    public Date getDueDate() {
-        return dueDate;
-    }
-
-    public void setDueDate(Date dueDate) {
-        this.dueDate = dueDate;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Priority getPriority() {
@@ -62,12 +50,54 @@ public class TaskDTO {
         this.status = status;
     }
 
-    public Date getStartDate() {
+    public LocalDateTime getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDateTime startDate) {
         this.startDate = startDate;
     }
+
+    public LocalDateTime getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDateTime dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
+    }
+
+    public List<String> getAssignees() {
+        return assignees;
+    }
+
+    public void setAssignees(List<String> assignees) {
+        this.assignees = assignees;
+    }
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
+    }
+
+    public long getParentTaskId() {
+        return parentTaskId;
+    }
+
+    public void setParentTaskId(long parentTaskId) {
+        this.parentTaskId = parentTaskId;
+    }
+
+    
 
 }

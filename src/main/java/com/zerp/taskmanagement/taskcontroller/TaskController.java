@@ -24,46 +24,14 @@ public class TaskController {
     @Autowired
     TaskService taskService;
 
+    @PostMapping("/tasks")
+    public Task createTask(@RequestBody TaskDTO taskDTO){
+        return taskService.createTask(taskDTO);
+    }
+
     @GetMapping("/tasks")
-    public List<Task> getAllTasks() {
-        return taskService.findAll();
-    }
-
-    @GetMapping("/tasks/priority/{priorityId}")
-    public List<Task> getTasksByPriority(@PathVariable String priorityId) {
-        Priority priority = Priority.fromString(priorityId);
-        return taskService.findByPriority(priority);
-    }
-
-    @GetMapping("/tasks/status/{statusId}")
-    public List<Task> getTasksByStatus(@PathVariable String statusId) {
-        Status status = Status.fromString(statusId);
-        return taskService.findByStatus(status);
-    }
-
-    @GetMapping("/tasks/due")
-    public List<Task> getTasksByDue(){
-        return taskService.findByDuedate();
-    }
-
-    @GetMapping("/task/{taskId}")
-    public Task getTaskById(@PathVariable long taskId) {
-        return taskService.findByTaskId(taskId);
-    }
-
-    @PostMapping("/task/add")
-    public String addTask(@RequestBody TaskDTO taskDTO) {
-        return taskService.addTask(taskDTO);
-    }
-
-    @PutMapping("/task/{taskId}")
-    public String updateTask(@PathVariable long taskId, @RequestBody TaskDTO taskDTO) {
-        return taskService.updateTask(taskId, taskDTO);
-    }
-
-    @DeleteMapping("/task/{taskId}")
-    public String deleteTask(@PathVariable long taskId) {
-        return taskService.deleteTask(taskId);
+    public List<Task> getTasks(){
+        return taskService.getTasks();
     }
 
 }

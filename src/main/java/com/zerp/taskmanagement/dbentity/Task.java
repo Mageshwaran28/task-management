@@ -1,19 +1,29 @@
 package com.zerp.taskmanagement.dbentity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.zerp.taskmanagement.myenum.Priority;
 import com.zerp.taskmanagement.myenum.Status;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "tasks")
 public class Task {
 
     @Id
@@ -28,12 +38,35 @@ public class Task {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    private long creatorId;
     private LocalDateTime createdAt;
-    private LocalDate startDate;
-    private LocalDate dueDate;
-    private long parentTaskId;
+    private LocalDateTime startDate;
+    private LocalDateTime dueDate;
     private int depth;
+
+    @OneToMany(mappedBy = "parentTask")
+    @JsonIgnoreProperties("parentTask")
+    private List<Task> childList;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_task_id", referencedColumnName = "id")
+    @JsonIgnore()
+    private Task parentTask;
+
+    @ManyToOne
+    @JoinColumn(name = "creator_id", referencedColumnName = "id")
+    private User creator;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "task_assignments", joinColumns = {
+            @JoinColumn(name = "task_id", referencedColumnName = "id") }, inverseJoinColumns = {
+                    @JoinColumn(name = "assignee_id", referencedColumnName = "id") })
+    private List<User> assignees;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinTable(name = "project_task_assignments", joinColumns = {
+            @JoinColumn(name = "task_id", referencedColumnName = "id") }, inverseJoinColumns = {
+                    @JoinColumn(name = "project_id", referencedColumnName = "id") })
+    Project project;
 
     public long getId() {
         return id;
@@ -75,13 +108,6 @@ public class Task {
         this.status = status;
     }
 
-    public long getCreatorId() {
-        return creatorId;
-    }
-
-    public void setCreatorId(long creatorId) {
-        this.creatorId = creatorId;
-    }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
@@ -91,28 +117,20 @@ public class Task {
         this.createdAt = createdAt;
     }
 
-    public LocalDate getStartDate() {
+    public LocalDateTime getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(LocalDate startDate) {
+    public void setStartDate(LocalDateTime startDate) {
         this.startDate = startDate;
     }
 
-    public LocalDate getDueDate() {
+    public LocalDateTime getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(LocalDate dueDate) {
+    public void setDueDate(LocalDateTime dueDate) {
         this.dueDate = dueDate;
-    }
-
-    public long getParentTaskId() {
-        return parentTaskId;
-    }
-
-    public void setParentTaskId(long parentTaskId) {
-        this.parentTaskId = parentTaskId;
     }
 
     public int getDepth() {
@@ -122,5 +140,47 @@ public class Task {
     public void setDepth(int depth) {
         this.depth = depth;
     }
+
+    public List<User> getAssignees() {
+        return assignees;
+    }
+
+    public void setAssignees(List<User> assignees) {
+        this.assignees = assignees;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    public User getCreator() {
+        return creator;
+    }
+
+    public void setCreator(User creator) {
+        this.creator = creator;
+    }
+
+    public List<Task> getChildList() {
+        return childList;
+    }
+
+    public void setChildList(List<Task> childList) {
+        this.childList = childList;
+    }
+
+    public Task getParentTask() {
+        return parentTask;
+    }
+
+    public void setParentTask(Task parentTask) {
+        this.parentTask = parentTask;
+    }
+
+    
 
 }
