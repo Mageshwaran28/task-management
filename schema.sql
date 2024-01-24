@@ -2,23 +2,12 @@ show databases;
 create database task_management;
 use task_management;
 show tables;
-desc user;
-desc project;
-desc task;
-select * from user;
-select * from project;
-select * from task;
-delete from user;
-delete from task;
-delete from project;
 drop database task_management;
 
 create table roles (
 	id bigint auto_increment unique not null primary key,
     role varchar(50) unique not null
 );
-desc roles;
-select * from roles;
 
 create table users (
 	id bigint auto_increment unique not null primary key,
@@ -28,8 +17,6 @@ create table users (
     constraint users_fk_role_id
     foreign key(role_id) references roles(id)
 );
-desc users;
-select * from users;
 
 create table projects (
 	id bigint auto_increment unique not null primary key,
@@ -39,8 +26,6 @@ create table projects (
     constraint projects_fk_creator_id 
     foreign key(creator_id) references users(id)
 );
-desc projects;
-select * from projects;
 
 create table project_assignments(
 	id bigint auto_increment unique not null primary key,
@@ -55,8 +40,6 @@ create table project_assignments(
     on update cascade
     on delete cascade
 );
-desc project_assignments;
-select * from project_assignments;
 
 create table tasks (
 	id bigint auto_increment unique not null primary key,
@@ -66,21 +49,16 @@ create table tasks (
 	status enum("PENDING" , "PROCESSING", "COMPLETED") not null,
     creator_id bigint not null,
 	created_at datetime default now() not null,
-	start_date date ,
-	due_date date ,
-	parent_task_id bigint default null,
+	start_date datetime not null ,
+	due_date date not null,
     depth int default 1 check(depth<=3),
     constraint tasks_fk_task_creator_id
     foreign key(creator_id) references users(id)
     on update cascade
-    on delete cascade,
-	constraint tasks_fk_parent_task_id 
-	foreign key(parent_task_id) references tasks(id)
-	ON UPDATE CASCADE
-	ON DELETE CASCADE
+    on delete cascade
 );
-desc tasks;
-select * from tasks;
+
+alter table tasks drop tasks_fk_parent_task_id;
 
 create table task_assignments(
 	id bigint auto_increment unique not null primary key,
@@ -95,8 +73,6 @@ create table task_assignments(
     on update cascade
     on delete cascade
 );
-desc task_assignments;
-select * from task_assignments;
 
 create table files(
 	id bigint auto_increment unique not null primary key,
@@ -108,8 +84,6 @@ create table files(
     on update cascade
     on delete cascade
 );
-desc files;
-select * from files;
 
 create table project_task_assignments(
 	id bigint auto_increment unique not null primary key,
@@ -124,8 +98,6 @@ create table project_task_assignments(
     on update cascade 
     on delete cascade
 );
-desc project_task_assignments;
-select * from project_task_assignments;
 
 -- Insert roles
 INSERT INTO roles (role) VALUES
@@ -179,3 +151,28 @@ INSERT INTO project_task_assignments (task_id, project_id) VALUES
   (1, 1),
   (2, 2),
   (3, 3);
+  
+  desc roles;
+select * from roles;
+desc users;
+select * from users;
+desc projects;
+select * from projects;
+
+desc project_assignments;
+select * from project_assignments;
+
+
+alter table tasks modify parent_task_id bigint null;
+
+desc tasks;
+select * from tasks;
+
+desc task_assignments;
+select * from task_assignments;
+
+desc files;
+select * from files;
+
+desc project_task_assignments;
+select * from project_task_assignments;
