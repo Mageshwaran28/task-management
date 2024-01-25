@@ -2,6 +2,9 @@ package com.zerp.taskmanagement.dbentity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.zerp.taskmanagement.jsonview.View;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,8 +22,13 @@ public class Project {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonView(value = {View.withOutChild.class})
     private long id;
+
+    @JsonView(value = {View.withOutChild.class})
     private String name;
+
+    @JsonView(value = {View.withOutChild.class})
     private String description;
 
     @OneToOne

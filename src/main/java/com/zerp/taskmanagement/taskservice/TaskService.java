@@ -1,5 +1,6 @@
 package com.zerp.taskmanagement.taskservice;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -9,12 +10,15 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.zerp.taskmanagement.customexception.EmptyInputException;
 import com.zerp.taskmanagement.customexception.InvalidInputException;
+import com.zerp.taskmanagement.dbentity.File;
 import com.zerp.taskmanagement.dbentity.Project;
 import com.zerp.taskmanagement.dbentity.Task;
 import com.zerp.taskmanagement.dbentity.User;
+import com.zerp.taskmanagement.dbrepository.FileRepository;
 import com.zerp.taskmanagement.dbrepository.ProjectRepository;
 import com.zerp.taskmanagement.dbrepository.TaskRepository;
 import com.zerp.taskmanagement.dbrepository.UserRepository;
@@ -32,6 +36,9 @@ public class TaskService {
 
     @Autowired
     ProjectRepository projectRepository;
+
+    @Autowired
+    FileRepository fileRepository;
 
     @Autowired
     Validator validator;
@@ -56,10 +63,14 @@ public class TaskService {
         task.setProject(getProject(taskDTO.getProjectId()));
 
         if (taskDTO.getParentTaskId() != 0 && validator.isValidTask(taskDTO.getParentTaskId())) {
-            Optional<Task> parent = taskRepository.findById(taskDTO.getParentTaskId());
-            Task parentTask = parent.get();
+            Task parentTask = taskRepository.findById(taskDTO.getParentTaskId()).get();
+            int depth = parentTask.getDepth() + 1;
+
+            if (depth > 3) {
+                throw new InvalidInputException("More than two levels of subtasks are not allowed.");
+            }
             task.setParentTask(parentTask);
-            task.setDepth(parentTask.getDepth() + 1);
+            task.setDepth(depth);
         }
 
         System.out.println(task.toString());
@@ -125,6 +136,35 @@ public class TaskService {
         }
 
         return tasks;
+    }
+
+    public File uploadFile(Long taskId, MultipartFile uploadFile) throws IOException {
+
+        if (uploadFile.isEmpty()) {
+            throw new InvalidInputException("Please choose a file to upload");
+        }
+
+        File file = new File();
+        file.setName(uploadFile.getOriginalFilename());
+        file.setType(uploadFile.getContentType());
+        file.setDocument(uploadFile.getBytes());
+
+        Task task = taskRepository.findById(taskId).get();
+        if (task != null) {
+            file.setTask(task);
+        } else {
+            throw new InvalidInputException("Could not find task");
+        }
+
+        fileRepository.save(file);
+
+        return file;
+    }
+
+    public File getFile(Long id) {
+
+        File recievedFile = fileRepository.findById(id).get();
+        return recievedFile;
     }
 
     // public String addTask(TaskDTO taskDTO) {

@@ -1,5 +1,9 @@
 package com.zerp.taskmanagement.dbentity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.zerp.taskmanagement.jsonview.View;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,7 +20,11 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @JsonView(value = {View.withOutChild.class})
     private String email;
+
+    @JsonIgnore
     private String password;
 
     @ManyToOne(cascade =  CascadeType.ALL)

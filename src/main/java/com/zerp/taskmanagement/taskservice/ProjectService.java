@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import com.zerp.taskmanagement.customexception.EmptyInputException;
 import com.zerp.taskmanagement.customexception.InvalidInputException;
 import com.zerp.taskmanagement.dbentity.Project;
+import com.zerp.taskmanagement.dbentity.ProjectAssignments;
 import com.zerp.taskmanagement.dbentity.User;
+import com.zerp.taskmanagement.dbrepository.ProjectAssignmentsRepository;
 import com.zerp.taskmanagement.dbrepository.ProjectRepository;
 import com.zerp.taskmanagement.dbrepository.UserRepository;
 import com.zerp.taskmanagement.dto.ProjectDTO;
@@ -23,6 +25,9 @@ public class ProjectService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    ProjectAssignmentsRepository assignmentsRepository;
 
     public Project createProject(ProjectDTO projectDTO) {
         if (isFieldsAreEmpty(projectDTO)) {
@@ -53,7 +58,7 @@ public class ProjectService {
         while (it.hasNext()) {
             User assignee = userRepository.findByEmailIgnoreCase(it.next());
             if(assignee == null){
-                throw new InvalidInputException("Invalid assignee email address: " + it);
+                throw new InvalidInputException("Invalid assignee email address: ");
             }
             assignees.add(assignee);
         }
@@ -69,6 +74,15 @@ public class ProjectService {
         }
 
         return false;
+    }
+
+    public ProjectAssignments createAssignee(ProjectAssignments projectAssignments) {
+        assignmentsRepository.save(projectAssignments);
+        return projectAssignments;
+    }
+
+    public List<Project> getProjects() {
+        return projectRepository.findAll();
     }
 
     // public List<Project> getProjects() {
