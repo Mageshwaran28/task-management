@@ -77,13 +77,15 @@ create table task_assignments(
 create table files(
 	id bigint auto_increment unique not null primary key,
     task_id bigint not null,
-    document blob not null,
+    name varchar(255) not null,
+    document mediumblob not null,
     uploaded_date datetime default now() not null,
     constraint files_fk_task_id
     foreign key(task_id) references tasks(id)
     on update cascade
     on delete cascade
 );
+
 
 create table project_task_assignments(
 	id bigint auto_increment unique not null primary key,
@@ -173,6 +175,7 @@ select * from task_assignments;
 
 desc files;
 select * from files;
+delete from files;
 
 desc project_task_assignments;
 select * from project_task_assignments;
