@@ -16,10 +16,13 @@ import com.zerp.taskmanagement.customexception.EmptyInputException;
 import com.zerp.taskmanagement.customexception.InvalidInputException;
 import com.zerp.taskmanagement.dbentity.File;
 import com.zerp.taskmanagement.dbentity.Project;
+import com.zerp.taskmanagement.dbentity.ProjectAssignment;
 import com.zerp.taskmanagement.dbentity.Task;
+import com.zerp.taskmanagement.dbentity.TaskAssignment;
 import com.zerp.taskmanagement.dbentity.User;
 import com.zerp.taskmanagement.dbrepository.FileRepository;
 import com.zerp.taskmanagement.dbrepository.ProjectRepository;
+import com.zerp.taskmanagement.dbrepository.TaskAssignmentRepository;
 import com.zerp.taskmanagement.dbrepository.TaskRepository;
 import com.zerp.taskmanagement.dbrepository.UserRepository;
 import com.zerp.taskmanagement.dto.TaskDTO;
@@ -42,6 +45,9 @@ public class TaskService {
 
     @Autowired
     Validator validator;
+
+    @Autowired
+    TaskAssignmentRepository taskAssignmentRepository;
 
     public Task createTask(TaskDTO taskDTO) {
 
@@ -82,13 +88,12 @@ public class TaskService {
     }
 
     private Project getProject(long projectId) {
-        Optional<Project> optionalProject = projectRepository.findById(projectId);
+        Project project = projectRepository.findById(projectId).get();
 
-        if (optionalProject.isEmpty()) {
+        if (project == null) {
             throw new InvalidInputException("Project id not found");
         }
 
-        Project project = optionalProject.get();
 
         return project;
     }
@@ -148,6 +153,7 @@ public class TaskService {
         file.setName(uploadFile.getOriginalFilename());
         file.setType(uploadFile.getContentType());
         file.setDocument(uploadFile.getBytes());
+        file.setUploadedDate(LocalDateTime.now());
 
         Task task = taskRepository.findById(taskId).get();
         if (task != null) {
@@ -165,6 +171,10 @@ public class TaskService {
 
         File recievedFile = fileRepository.findById(id).get();
         return recievedFile;
+    }
+
+    public TaskAssignment createAssignee(TaskAssignment taskAssignment) {
+        return taskAssignmentRepository.save(taskAssignment);
     }
 
     // public String addTask(TaskDTO taskDTO) {

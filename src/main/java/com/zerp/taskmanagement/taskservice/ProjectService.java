@@ -10,12 +10,13 @@ import org.springframework.stereotype.Service;
 import com.zerp.taskmanagement.customexception.EmptyInputException;
 import com.zerp.taskmanagement.customexception.InvalidInputException;
 import com.zerp.taskmanagement.dbentity.Project;
-import com.zerp.taskmanagement.dbentity.ProjectAssignments;
+import com.zerp.taskmanagement.dbentity.ProjectAssignment;
 import com.zerp.taskmanagement.dbentity.User;
-import com.zerp.taskmanagement.dbrepository.ProjectAssignmentsRepository;
+import com.zerp.taskmanagement.dbrepository.ProjectAssignmentRepository;
 import com.zerp.taskmanagement.dbrepository.ProjectRepository;
 import com.zerp.taskmanagement.dbrepository.UserRepository;
 import com.zerp.taskmanagement.dto.ProjectDTO;
+import com.zerp.taskmanagement.validation.Validator;
 
 @Service
 public class ProjectService {
@@ -27,7 +28,10 @@ public class ProjectService {
     UserRepository userRepository;
 
     @Autowired
-    ProjectAssignmentsRepository assignmentsRepository;
+    Validator validator;
+
+    @Autowired
+    ProjectAssignmentRepository projectAssignmentRepository;
 
     public Project createProject(ProjectDTO projectDTO) {
         if (isFieldsAreEmpty(projectDTO)) {
@@ -76,13 +80,26 @@ public class ProjectService {
         return false;
     }
 
-    public ProjectAssignments createAssignee(ProjectAssignments projectAssignments) {
-        assignmentsRepository.save(projectAssignments);
-        return projectAssignments;
-    }
-
     public List<Project> getProjects() {
         return projectRepository.findAll();
+    }
+
+    public String createAssignee(long projectId, List<String> emails) {
+
+        if(validator.isValidProject(projectId)){
+            List<User> users = getAssignees(emails);
+            
+            ProjectAssignment assignment = new ProjectAssignment();
+            assignment.setProjectId(projectId);
+
+            for (User user : users) {
+                assignment.setAssigneeId(user.getId());
+                projectAssignmentRepository.save(assignment); 
+            }
+
+        }
+
+        return "Successfully";
     }
 
     // public List<Project> getProjects() {

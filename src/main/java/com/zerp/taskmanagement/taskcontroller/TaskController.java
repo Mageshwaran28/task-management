@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.zerp.taskmanagement.dbentity.File;
+import com.zerp.taskmanagement.dbentity.ProjectAssignment;
 import com.zerp.taskmanagement.dbentity.Task;
+import com.zerp.taskmanagement.dbentity.TaskAssignment;
 import com.zerp.taskmanagement.dto.TaskDTO;
-import com.zerp.taskmanagement.jsonview.View;
 import com.zerp.taskmanagement.taskservice.TaskService;
 
 @RestController
@@ -53,6 +53,11 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.valueOf(receivedFile.getType()))
                 .body(receivedFile.getDocument());
+    }
+
+    @PostMapping("/tasks/assignee")
+    public TaskAssignment createAssignee(@RequestBody TaskAssignment taskAssignment) {
+        return taskService.createAssignee(taskAssignment);
     }
 
 }

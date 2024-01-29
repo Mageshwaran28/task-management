@@ -1,5 +1,6 @@
 package com.zerp.taskmanagement.myenum;
 
+
 public enum Priority {
     HIGH("1"),
     MEDIUM("2"),
@@ -21,6 +22,8 @@ public enum Priority {
                 return priority;
             }
         }
-        throw new IllegalArgumentException("No enum constant with string value: " + stringValue);
+        return null;
     }
 }
+
+

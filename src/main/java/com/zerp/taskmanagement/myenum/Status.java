@@ -5,7 +5,9 @@ public enum Status {
     PENDING("1"),
     PROCESSING("2"),
     COMPLETED("3");
-
+    // PENDING,
+    // PROCESSING,
+    // COMPLETED;
 
     private final String stringValue;
 
@@ -23,7 +25,7 @@ public enum Status {
                 return status;
             }
         }
-        throw new IllegalArgumentException("No enum constant with string value: " + stringValue);
+        return null;
     }
 }
 
