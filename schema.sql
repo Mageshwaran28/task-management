@@ -16,6 +16,8 @@ create table users (
     password varchar(16) not null check(char_length(password)>=6 and char_length(password)<=16) ,
     constraint users_fk_role_id
     foreign key(role_id) references roles(id)
+     on update cascade
+    on delete cascade
 );
 
 create table projects (
@@ -51,14 +53,18 @@ create table tasks (
 	created_at datetime default now() not null,
 	start_date datetime not null ,
 	due_date date not null,
+    parent_task_id bigint null,
     depth int default 1 check(depth<=3),
     constraint tasks_fk_task_creator_id
     foreign key(creator_id) references users(id)
     on update cascade
+    on delete cascade,
+    constraint tasks_fk_parent_task_id
+	foreign key(parent_task_id) references tasks(id)
+    on update cascade
     on delete cascade
 );
 
-alter table tasks drop tasks_fk_parent_task_id;
 
 create table task_assignments(
 	id bigint auto_increment unique not null primary key,
@@ -142,12 +148,6 @@ INSERT INTO task_assignments (task_id, assignee_id) VALUES
   (2, 3),
   (3, 4);
 
--- Insert files
-INSERT INTO files (task_id, document) VALUES
-  (1, 'Sample document for Task 1'),
-  (2, 'Sample document for Task 2'),
-  (3, 'Sample document for Task 3');
-
 -- Insert project task assignments
 INSERT INTO project_task_assignments (task_id, project_id) VALUES
   (1, 1),
@@ -158,17 +158,16 @@ INSERT INTO project_task_assignments (task_id, project_id) VALUES
 select * from roles;
 desc users;
 select * from users;
+delete from users;
 desc projects;
 select * from projects;
 
 desc project_assignments;
 select * from project_assignments;
 
-
-alter table tasks modify parent_task_id bigint null;
-
 desc tasks;
 select * from tasks;
+delete from tasks where id = 2;
 
 desc task_assignments;
 select * from task_assignments;

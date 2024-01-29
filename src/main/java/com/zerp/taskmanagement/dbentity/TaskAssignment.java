@@ -1,10 +1,11 @@
 package com.zerp.taskmanagement.dbentity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -15,11 +16,13 @@ public class TaskAssignment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
 
-    @Column(name = "task_id")
-    private long taskId;
+    @ManyToOne
+    @JoinColumn(name = "task_id")
+    private Task task;
 
-    @Column(name = "assignee_id")
-    private long assigneeId;
+    @ManyToOne
+    @JoinColumn(name = "assignee_id")
+    private User assignee;
 
     public long getId() {
         return id;
@@ -29,20 +32,20 @@ public class TaskAssignment {
         this.id = id;
     }
 
-    public long getAssigneeId() {
-        return assigneeId;
+    public Task getTask() {
+        return task;
     }
 
-    public void setAssigneeId(long assigneeId) {
-        this.assigneeId = assigneeId;
+    public void setTask(Task task) {
+        this.task = task;
     }
 
-    public long getTaskId() {
-        return taskId;
+    public User getAssignee() {
+        return assignee;
     }
 
-    public void setTaskId(long taskId) {
-        this.taskId = taskId;
+    public void setAssignee(User assignee) {
+        this.assignee = assignee;
     }
 
 }

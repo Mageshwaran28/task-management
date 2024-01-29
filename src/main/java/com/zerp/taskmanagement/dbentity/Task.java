@@ -2,6 +2,7 @@ package com.zerp.taskmanagement.dbentity;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -48,6 +49,8 @@ public class Task {
     private LocalDateTime createdAt;
     private LocalDateTime startDate;
     private LocalDateTime dueDate;
+
+    @JsonIgnore
     private int depth;
 
     @OneToMany(mappedBy = "task")
@@ -67,12 +70,12 @@ public class Task {
     @JsonView(value = { View.withOutChild.class })
     private User creator;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(name = "task_assignments", joinColumns = {
             @JoinColumn(name = "task_id", referencedColumnName = "id") }, inverseJoinColumns = {
                     @JoinColumn(name = "assignee_id", referencedColumnName = "id") })
     @JsonView(value = { View.withOutChild.class })
-    private List<User> assignees;
+    private Set<User> assignees;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinTable(name = "project_task_assignments", joinColumns = {
@@ -153,11 +156,11 @@ public class Task {
         this.depth = depth;
     }
 
-    public List<User> getAssignees() {
+    public Set<User> getAssignees() {
         return assignees;
     }
 
-    public void setAssignees(List<User> assignees) {
+    public void setAssignees(Set<User> assignees) {
         this.assignees = assignees;
     }
 

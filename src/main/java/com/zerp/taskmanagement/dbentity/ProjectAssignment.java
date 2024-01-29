@@ -1,43 +1,51 @@
 package com.zerp.taskmanagement.dbentity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "project_assignments")
 public class ProjectAssignment {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
-    
-    @Column(name = "project_id")
-    private long projectId;
 
-    @Column(name = "assignee_id")
-    private long assigneeId;
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
+
+    @ManyToOne
+    @JoinColumn(name = "assignee_id")
+    private User assignee;
 
     public long getId() {
         return id;
     }
+
     public void setId(long id) {
         this.id = id;
     }
-    public long getProjectId() {
-        return projectId;
+
+    public Project getProject() {
+        return project;
     }
-    public void setProjectId(long projectId) {
-        this.projectId = projectId;
+
+    public void setProject(Project project) {
+        this.project = project;
     }
-    public long getAssigneeId() {
-        return assigneeId;
+
+    public User getAssignee() {
+        return assignee;
     }
-    public void setAssigneeId(long assigneeId) {
-        this.assigneeId = assigneeId;
+
+    public void setAssignee(User assignee) {
+        this.assignee = assignee;
     }
 
     

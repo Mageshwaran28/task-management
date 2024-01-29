@@ -2,11 +2,10 @@ package com.zerp.taskmanagement.taskservice;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,6 @@ import com.zerp.taskmanagement.customexception.EmptyInputException;
 import com.zerp.taskmanagement.customexception.InvalidInputException;
 import com.zerp.taskmanagement.dbentity.File;
 import com.zerp.taskmanagement.dbentity.Project;
-import com.zerp.taskmanagement.dbentity.ProjectAssignment;
 import com.zerp.taskmanagement.dbentity.Task;
 import com.zerp.taskmanagement.dbentity.TaskAssignment;
 import com.zerp.taskmanagement.dbentity.User;
@@ -26,6 +24,8 @@ import com.zerp.taskmanagement.dbrepository.TaskAssignmentRepository;
 import com.zerp.taskmanagement.dbrepository.TaskRepository;
 import com.zerp.taskmanagement.dbrepository.UserRepository;
 import com.zerp.taskmanagement.dto.TaskDTO;
+import com.zerp.taskmanagement.myenum.Priority;
+import com.zerp.taskmanagement.myenum.Status;
 import com.zerp.taskmanagement.validation.Validator;
 
 @Service
@@ -47,6 +47,9 @@ public class TaskService {
     Validator validator;
 
     @Autowired
+    ProjectService projectService;
+
+    @Autowired
     TaskAssignmentRepository taskAssignmentRepository;
 
     public Task createTask(TaskDTO taskDTO) {
@@ -65,7 +68,7 @@ public class TaskService {
         task.setDueDate(taskDTO.getDueDate());
 
         task.setCreator(userRepository.findByEmailIgnoreCase(taskDTO.getCreator()));
-        task.setAssignees(getAssignees(taskDTO.getAssignees()));
+        task.setAssignees(projectService.getAssignees(taskDTO.getAssignees()));
         task.setProject(getProject(taskDTO.getProjectId()));
 
         if (taskDTO.getParentTaskId() != 0 && validator.isValidTask(taskDTO.getParentTaskId())) {
@@ -94,23 +97,7 @@ public class TaskService {
             throw new InvalidInputException("Project id not found");
         }
 
-
         return project;
-    }
-
-    private List<User> getAssignees(List<String> assigneesName) {
-        List<User> assignees = new LinkedList<User>();
-        Iterator<String> it = assigneesName.iterator();
-
-        while (it.hasNext()) {
-            User assignee = userRepository.findByEmailIgnoreCase(it.next());
-            if (assignee == null) {
-                throw new InvalidInputException("Invalid creator name ");
-            }
-            assignees.add(assignee);
-        }
-
-        return assignees;
     }
 
     private boolean isFieldsAreEmpty(TaskDTO taskDTO) {
@@ -136,7 +123,7 @@ public class TaskService {
 
         List<Task> tasks = taskRepository.findByParentTaskIdNull();
 
-        if (tasks.size() == 0) {
+        if (tasks.size() == 0 || tasks == null) {
             throw new NoSuchElementException();
         }
 
@@ -173,8 +160,142 @@ public class TaskService {
         return recievedFile;
     }
 
-    public TaskAssignment createAssignee(TaskAssignment taskAssignment) {
-        return taskAssignmentRepository.save(taskAssignment);
+    public String createAssignee(long id, Set<String> emais) {
+
+        if (validator.isValidTask(id)) {
+
+            Set<User> users = projectService.getAssignees(emais);
+
+            for (User user : users) {
+                if (!validator.isValidTaskAssignee(id, user.getId())) {
+                    TaskAssignment assignment = new TaskAssignment();
+                    assignment.setTask(taskRepository.findById(id).get());
+                    assignment.setAssignee(user);
+
+                    taskAssignmentRepository.save(assignment);
+                } else {
+                    throw new InvalidInputException("Already assignee exists for task " + user.getEmail());
+                }
+            }
+
+        }
+
+        return "Success";
+
+    }
+
+    public Task geTask(Long id) {
+        Task task = taskRepository.findById(id).get();
+
+        if (task == null) {
+            throw new NoSuchElementException();
+        }
+
+        return task;
+    }
+
+    public List<Task> getTasksByPriority(Priority priority) {
+        List<Task> tasks = taskRepository.findByPriority(priority);
+
+        if (tasks.size() == 0) {
+            throw new NoSuchElementException();
+        }
+        return tasks;
+
+    }
+
+    public List<Task> getTasksByStatus(Status status) {
+        List<Task> tasks = taskRepository.findByStatus(status);
+
+        if (tasks.size() == 0) {
+            throw new NoSuchElementException();
+        }
+        return tasks;
+    }
+
+    public List<Task> getTasksByCreatorId(String email) {
+
+        User user = userRepository.findByEmailIgnoreCase(email);
+
+        List<Task> tasks = taskRepository.findByCreatorId(user.getId());
+
+        if (tasks.size() == 0) {
+            throw new NoSuchElementException();
+        }
+        return tasks;
+    }
+
+    public List<Task> getTasksByAssigneeId(String email) {
+
+        User user = userRepository.findByEmailIgnoreCase(email);
+
+        List<TaskAssignment> taskAssignments = taskAssignmentRepository.findByAssigneeId(user.getId());
+
+        List<Task> tasks = new LinkedList<Task>();
+
+        for (TaskAssignment taskAssignment : taskAssignments) {
+            tasks.add(taskAssignment.getTask());
+        }
+
+        if (tasks.size() == 0) {
+            throw new NoSuchElementException();
+        }
+
+        return tasks;
+
+    }
+
+    public List<Task> getTasksByDueDate() {
+        List<Task> tasks = taskRepository.findByDueDateBefore(LocalDateTime.now());
+
+        if (tasks.size() == 0) {
+            throw new NoSuchElementException();
+        }
+
+        return tasks;
+    }
+
+    public String deleteTaskById(Long id) {
+
+        if (validator.isValidTask(id)) {
+            taskRepository.deleteById(id);
+        } else {
+            throw new InvalidInputException("Invalid task id: " + id);
+        }
+
+        return "Task " + id + " has been deleted";
+    }
+
+    public String deleteTaskFileById(Long id) {
+        if (validator.isValidFile(id)) {
+            fileRepository.deleteById(id);
+        } else {
+            throw new InvalidInputException("Invalid file id: " + id);
+        }
+
+        return "File " + id + " has been deleted";
+    }
+
+    public String deleteTaskAssigneesById(Long id, String email) {
+
+        User user = userRepository.findByEmailIgnoreCase(email);
+
+        if (user != null && validator.isValidTaskAssignee(id, user.getId())) {
+
+            System.out.println("deleteTaskAssigneesById" + id + " has been deleted");
+
+            // TaskAssignment assignment =
+            // taskAssignmentRepository.findByTaskIdAndAssigneeId(id, user.getId());
+            // System.out.println();
+            // System.out.println(assignment.getId());
+            // System.out.println();
+
+            // taskAssignmentRepository.deleteById(assignment.getId());
+            taskAssignmentRepository.removeByTaskIdAndAssigneeId(id, user.getId());
+
+        }
+
+        return "Remove assignee " + email + " from task assignment " + id;
     }
 
     // public String addTask(TaskDTO taskDTO) {

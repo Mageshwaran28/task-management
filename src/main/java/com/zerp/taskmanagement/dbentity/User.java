@@ -1,10 +1,10 @@
 package com.zerp.taskmanagement.dbentity;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.zerp.taskmanagement.jsonview.View;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,8 +27,9 @@ public class User {
     @JsonIgnore
     private String password;
 
-    @ManyToOne(cascade =  CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "role_id")
+    @JsonIgnore
     private Role role;
 
     public long getId() {
@@ -62,5 +63,6 @@ public class User {
     public void setRole(Role role) {
         this.role = role;
     }
+  
 
 }

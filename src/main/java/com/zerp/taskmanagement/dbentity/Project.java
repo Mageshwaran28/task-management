@@ -1,6 +1,6 @@
 package com.zerp.taskmanagement.dbentity;
 
-import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.zerp.taskmanagement.jsonview.View;
@@ -35,11 +35,11 @@ public class Project {
     @JoinColumn(name = "creator_id", referencedColumnName = "id")
     private User creator;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(name = "project_assignments", joinColumns = {
             @JoinColumn(name = "project_id", referencedColumnName = "id") }, inverseJoinColumns = {
                     @JoinColumn(name = "assignee_id", referencedColumnName = "id") })
-    private List<User> assignees;
+    private Set<User> assignees;
 
     public long getId() {
         return id;
@@ -73,11 +73,11 @@ public class Project {
         this.creator = creator;
     }
 
-    public List<User> getAssignees() {
+    public Set<User> getAssignees() {
         return assignees;
     }
 
-    public void setAssignees(List<User> assignees) {
+    public void setAssignees(Set<User> assignees) {
         this.assignees = assignees;
     }
 

@@ -1,7 +1,7 @@
 package com.zerp.taskmanagement.dto;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 import com.zerp.taskmanagement.myenum.Priority;
 import com.zerp.taskmanagement.myenum.Status;
@@ -14,7 +14,7 @@ public class TaskDTO {
     private LocalDateTime startDate;
     private LocalDateTime dueDate;
     private String creator;
-    private List<String> assignees;
+    private Set<String> assignees;
     private long projectId;
     private long parentTaskId;
 
@@ -74,11 +74,11 @@ public class TaskDTO {
         this.creator = creator;
     }
 
-    public List<String> getAssignees() {
+    public Set<String> getAssignees() {
         return assignees;
     }
 
-    public void setAssignees(List<String> assignees) {
+    public void setAssignees(Set<String> assignees) {
         this.assignees = assignees;
     }
 

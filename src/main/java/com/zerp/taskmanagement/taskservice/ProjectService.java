@@ -1,10 +1,13 @@
 package com.zerp.taskmanagement.taskservice;
 
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.zerp.taskmanagement.customexception.EmptyInputException;
@@ -16,10 +19,14 @@ import com.zerp.taskmanagement.dbrepository.ProjectAssignmentRepository;
 import com.zerp.taskmanagement.dbrepository.ProjectRepository;
 import com.zerp.taskmanagement.dbrepository.UserRepository;
 import com.zerp.taskmanagement.dto.ProjectDTO;
+import com.zerp.taskmanagement.dto.ProjectUpdateDTO;
 import com.zerp.taskmanagement.validation.Validator;
 
 @Service
 public class ProjectService {
+
+    @Autowired
+    Validator validator;
 
     @Autowired
     ProjectRepository projectRepository;
@@ -27,8 +34,6 @@ public class ProjectService {
     @Autowired
     UserRepository userRepository;
 
-    @Autowired
-    Validator validator;
 
     @Autowired
     ProjectAssignmentRepository projectAssignmentRepository;
@@ -43,26 +48,25 @@ public class ProjectService {
         project.setDescription(projectDTO.getDescription());
 
         User creator = userRepository.findByEmailIgnoreCase(projectDTO.getCreator());
-        if(creator == null){
+        if (creator == null) {
             System.out.println(projectDTO.getCreator());
             throw new InvalidInputException("Invalid creator email address ");
         }
 
         project.setCreator(creator);
-        project.setAssignees(getAssignees(projectDTO.getAssignees()));        
+        project.setAssignees(getAssignees(projectDTO.getAssignees()));
         projectRepository.save(project);
         return project;
 
     }
 
-    private List<User> getAssignees(List<String> assigneesName) {
-        List<User> assignees = new LinkedList<User>();
-        Iterator<String> it = assigneesName.iterator();
+    public Set<User> getAssignees(Set<String> assigneesName) {
+        Set<User> assignees = new HashSet<User>();
 
-        while (it.hasNext()) {
-            User assignee = userRepository.findByEmailIgnoreCase(it.next());
-            if(assignee == null){
-                throw new InvalidInputException("Invalid assignee email address: ");
+        for (String email : assigneesName) {
+            User assignee = userRepository.findByEmailIgnoreCase(email);
+            if (assignee == null) {
+                throw new InvalidInputException("Invalid assignee email address:" + email);
             }
             assignees.add(assignee);
         }
@@ -73,7 +77,7 @@ public class ProjectService {
     private boolean isFieldsAreEmpty(ProjectDTO projectDTO) {
 
         if (projectDTO.getName() == null || projectDTO.getDescription() == null || projectDTO.getCreator() == null
-                || projectDTO.getAssignees()== null || projectDTO.getAssignees().size() == 0) {
+                || projectDTO.getAssignees() == null || projectDTO.getAssignees().size() == 0) {
             return true;
         }
 
@@ -81,20 +85,30 @@ public class ProjectService {
     }
 
     public List<Project> getProjects() {
-        return projectRepository.findAll();
+        List<Project> projects = projectRepository.findAll();
+
+        if (projects == null || projects.size() == 0) {
+            throw new NoSuchElementException();
+        }
+
+        return projects;
     }
 
-    public String createAssignee(long projectId, List<String> emails) {
+    public String createAssignee(long projectId, Set<String> emails) {
 
-        if(validator.isValidProject(projectId)){
-            List<User> users = getAssignees(emails);
-            
-            ProjectAssignment assignment = new ProjectAssignment();
-            assignment.setProjectId(projectId);
+        if (validator.isValidProject(projectId)) {
+
+            Set<User> users = getAssignees(emails);
 
             for (User user : users) {
-                assignment.setAssigneeId(user.getId());
-                projectAssignmentRepository.save(assignment); 
+                if (!validator.isValidProjectAssignee(projectId, user.getId())) {
+                    ProjectAssignment assignment = new ProjectAssignment();
+                    assignment.setProject(projectRepository.findById(projectId).get());
+                    assignment.setAssignee(user);
+                    projectAssignmentRepository.save(assignment);
+                } else {
+                    throw new InvalidInputException("Already assignee exists for project " + user.getEmail());
+                }
             }
 
         }
@@ -102,50 +116,84 @@ public class ProjectService {
         return "Successfully";
     }
 
-    // public List<Project> getProjects() {
-    // List<Project> projects = projectRepository.findAll();
+    public Project getProject(long id) {
+        Project project = projectRepository.findById(id).get();
 
-    // if (projects.size() == 0) {
-    // throw new NoSuchElementException("No value is present in database , Please
-    // change your request");
+        if (project == null) {
+            throw new NoSuchElementException();
+        }
+
+        return project;
+    }
+
+    public List<Project> getProjectsByCreatorId(String email) {
+        User user = userRepository.findByEmailIgnoreCase(email);
+
+        List<Project> projects = projectRepository.findByCreatorId(user.getId());
+
+        if (projects.size() == 0) {
+            throw new NoSuchElementException();
+        }
+        return projects;
+    }
+
+    public List<Project> getProjectsByAssigneeId(String email) {
+        User user = userRepository.findByEmailIgnoreCase(email);
+
+        List<ProjectAssignment> projectAssignments = projectAssignmentRepository.findByAssigneeId(user.getId());
+
+        List<Project> projects = new LinkedList<Project>();
+
+        for (ProjectAssignment projectAssignment : projectAssignments) {
+            projects.add(projectAssignment.getProject());
+        }
+
+        if (projects.size() == 0) {
+            throw new NoSuchElementException();
+        }
+
+        return projects;
+    }
+
+    public String updateProject(long id, ProjectUpdateDTO updateProject) {
+        
+        Project project = projectRepository.findById(id).get();
+
+        if(project == null) {
+            throw new InvalidInputException("Invalid project id: " + id);
+        }
+
+        if(updateProject.getName() !=null && updateProject.getName().length() >0){
+            project.setName(updateProject.getName());
+        }
+
+        if(updateProject.getDescription() !=null && updateProject.getDescription().length() >0){
+            project.setDescription(updateProject.getDescription());
+        }
+
+        projectRepository.save(project);
+
+        return "Project updated";
+    }
+
+    // public String deleteProject(long id) {
+        
+    //     if(validator.isValidProject(id)){
+    //         projectRepository.deleteById(id);
+    //     }
+
+    //     return "Project "+id+" has been deleted";
     // }
 
-    // return projects;
+    // public String deleteProjectAssignee(long id, String email) {
+
+    //     User user = userRepository.findByEmailIgnoreCase(email);
+
+    //     if(user !=null && validator.isValidProjectAssignee(id, user.getId())){
+    //         projectAssignmentRepository.removeByProjectIdAndAssigneeId(id, user.getId());
+    //     }
+        
+    //     return "Remove assignee" + email + " from project " + id;
     // }
 
-
-    // public Project findByprojectId(long projectId) {
-    // Project project = projectRepository.findByProjectId(projectId);
-
-    // if (project == null) {
-    // throw new NoSuchElementException("No value is present in database , Please
-    // change your request");
-    // }
-
-    // return project;
-    // }
-
-    // public String updateProject(Project project, long projectId) {
-
-    // Project existProject = projectRepository.findByProjectId(projectId);
-
-    // if (project.getProjectName() != null &&
-    // existProject.getProjectName().length() != 0) {
-    // existProject.setProjectName(project.getProjectName());
-    // }
-    // if (project.getProjectDescription() != null &&
-    // existProject.getProjectDescription().length() != 0) {
-    // existProject.setProjectDescription(project.getProjectDescription());
-    // }
-    // if (project.getStartDate() != null) {
-    // existProject.setStartDate(project.getStartDate());
-    // }
-    // if (project.getEndDate() != null) {
-    // existProject.setEndDate(project.getEndDate());
-    // }
-
-    // projectRepository.save(existProject);
-
-    // return "Updated";
-    // }
 }

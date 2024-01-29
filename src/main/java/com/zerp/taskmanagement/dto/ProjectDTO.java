@@ -1,13 +1,13 @@
 package com.zerp.taskmanagement.dto;
 
-import java.util.List;
+import java.util.Set;
 
 public class ProjectDTO {
 
     private String name;
     private String description;
     private String creator;
-    private List<String> assignees;
+    private Set<String> assignees;
 
     public String getName() {
         return name;
@@ -33,11 +33,11 @@ public class ProjectDTO {
         this.creator = creator;
     }
 
-    public List<String> getAssignees() {
+    public Set<String> getAssignees() {
         return assignees;
     }
 
-    public void setAssignees(List<String> assignees) {
+    public void setAssignees(Set<String> assignees) {
         this.assignees = assignees;
     }
 

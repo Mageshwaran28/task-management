@@ -9,7 +9,9 @@ import com.zerp.taskmanagement.dbentity.Role;
 import com.zerp.taskmanagement.dbentity.User;
 import com.zerp.taskmanagement.dbrepository.RoleRepository;
 import com.zerp.taskmanagement.dbrepository.UserRepository;
+import com.zerp.taskmanagement.dto.ChangePasswordDTO;
 import com.zerp.taskmanagement.dto.UserDTO;
+import com.zerp.taskmanagement.validation.Validator;
 
 @Service
 public class UserService {
@@ -20,13 +22,20 @@ public class UserService {
     @Autowired
     RoleRepository roleRepository;
 
+    @Autowired
+    Validator validator;
+
     public User addUser(UserDTO userDTO) throws IllegalAccessException {
 
         if (isFieldsAreEmpty(userDTO)) {
             throw new InvalidInputException("Input fields are empty");
         }
-        if(userRepository.existsByEmail(userDTO.getEmail())){
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new DuplicateInputException();
+        }
+        if (!validator.isValidPassword(userDTO.getPassword())) {
+            throw new InvalidInputException(
+                    "Password must be strong, it contains \natleast one lowercase character \nnatleast one  uppercase character \nnatleast one digit \nnatleast one super character ");
         }
 
         User user = new User();
@@ -40,7 +49,9 @@ public class UserService {
             role.setRole(userDTO.getRole());
         }
         user.setRole(role);
-
+        System.out.println();
+        System.out.println(user.getEmail()+" "+user.getRole().getRole());
+        System.out.println();
         userRepository.save(user);
 
         return user;
@@ -48,7 +59,7 @@ public class UserService {
 
     private boolean isFieldsAreEmpty(UserDTO userDTO) {
 
-        if ( userDTO.getEmail() == null) {
+        if (userDTO.getEmail() == null) {
             return true;
         }
 
@@ -63,7 +74,47 @@ public class UserService {
         return false;
     }
 
-    
+    public String changePassword(String email, ChangePasswordDTO changePasswordDTO) {
+
+        User user = userRepository.findByEmailAndPassword(email, changePasswordDTO.getCurrentPassword());
+
+        if (user == null) {
+            throw new InvalidInputException("Invalid email or password");
+        }
+        if (!validator.isValidPassword(changePasswordDTO.getNewPassword())) {
+            throw new InvalidInputException(
+                    "Password must be strong, it contains \natleast one lowercase character \natleast one  uppercase character \natleast one digit \natleast one super character ");
+        }
+
+        user.setPassword(changePasswordDTO.getNewPassword());
+        userRepository.save(user);
+
+        return "Passord changed";
+
+    }
+
+
+    public String changeUserRole(String email, String newRole) {
+       User user = userRepository.findByEmailIgnoreCase(email);
+
+       if(user == null) {
+        throw new InvalidInputException("Invalid email");
+       }
+
+       Role role = roleRepository.findByRole(newRole);
+
+        if (role == null) {
+            role = new Role();
+            role.setRole(newRole);
+        }
+        user.setRole(role);
+
+        userRepository.save(user);
+
+
+       return "Role updated";
+
+    }
 
     // public List<User> findAll() {
 
