@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.zerp.taskmanagement.dbentity.User;
 import com.zerp.taskmanagement.dto.ChangePasswordDTO;
+import com.zerp.taskmanagement.dto.UpdateUserDTO;
 import com.zerp.taskmanagement.dto.UserDTO;
 import com.zerp.taskmanagement.taskservice.UserService;
 
@@ -30,8 +31,8 @@ public class UserController {
     }
 
     @PutMapping("users/{email}")
-    public String changeUserRole(@PathVariable String email , @RequestBody String newRole){
-        return userService.changeUserRole(email , newRole);
+    public String changeUserRole(@PathVariable String email , @RequestBody UpdateUserDTO user){
+        return userService.changeUserRole(email , user.getRole());
     }
 
 }

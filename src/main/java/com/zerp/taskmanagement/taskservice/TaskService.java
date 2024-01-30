@@ -24,12 +24,18 @@ import com.zerp.taskmanagement.dbrepository.TaskAssignmentRepository;
 import com.zerp.taskmanagement.dbrepository.TaskRepository;
 import com.zerp.taskmanagement.dbrepository.UserRepository;
 import com.zerp.taskmanagement.dto.TaskDTO;
+import com.zerp.taskmanagement.dto.TaskUpdateDTO;
 import com.zerp.taskmanagement.myenum.Priority;
 import com.zerp.taskmanagement.myenum.Status;
 import com.zerp.taskmanagement.validation.Validator;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class TaskService {
+
+    @Autowired
+    Validator validator;
 
     @Autowired
     TaskRepository taskRepository;
@@ -42,9 +48,6 @@ public class TaskService {
 
     @Autowired
     FileRepository fileRepository;
-
-    @Autowired
-    Validator validator;
 
     @Autowired
     ProjectService projectService;
@@ -61,28 +64,30 @@ public class TaskService {
         Task task = new Task();
         task.setName(taskDTO.getName());
         task.setDescription(taskDTO.getDescription());
-        task.setPriority(taskDTO.getPriority());
-        task.setStatus(taskDTO.getStatus());
-        task.setCreatedAt(LocalDateTime.now());
-        task.setStartDate(taskDTO.getStartDate());
-        task.setDueDate(taskDTO.getDueDate());
 
-        task.setCreator(userRepository.findByEmailIgnoreCase(taskDTO.getCreator()));
+        task.setPriority(getPriority(taskDTO.getPriority()));
+        task.setStatus(getStatus(taskDTO.getStatus()));
+        task.setCreatedAt(LocalDateTime.now());
+
+        if (validator.isValidStartDate(taskDTO.getStartDate())) {
+            task.setStartDate(taskDTO.getStartDate());
+        }
+
+        if (validator.isValidDueDate(taskDTO.getDueDate())) {
+            task.setDueDate(taskDTO.getDueDate());
+        }
+
+        task.setCreator(projectService.getCreator(taskDTO.getCreator()));
         task.setAssignees(projectService.getAssignees(taskDTO.getAssignees()));
         task.setProject(getProject(taskDTO.getProjectId()));
 
-        if (taskDTO.getParentTaskId() != 0 && validator.isValidTask(taskDTO.getParentTaskId())) {
+        if (taskDTO.getParentTaskId() != 0
+                && validator.isValidParentTask(taskDTO.getParentTaskId(), taskDTO.getProjectId())) {
             Task parentTask = taskRepository.findById(taskDTO.getParentTaskId()).get();
             int depth = parentTask.getDepth() + 1;
-
-            if (depth > 3) {
-                throw new InvalidInputException("More than two levels of subtasks are not allowed.");
-            }
             task.setParentTask(parentTask);
             task.setDepth(depth);
         }
-
-        System.out.println(task.toString());
 
         taskRepository.save(task);
 
@@ -90,28 +95,22 @@ public class TaskService {
 
     }
 
+    private Status getStatus(int status) {
+        return Status.fromString(Integer.toString(status));
+    }
+
+    private Priority getPriority(int priority) {
+        return Priority.fromString(Integer.toString(priority));
+    }
+
     private Project getProject(long projectId) {
-        Project project = projectRepository.findById(projectId).get();
-
-        if (project == null) {
-            throw new InvalidInputException("Project id not found");
-        }
-
-        return project;
+        validator.isValidProject(projectId);
+        return projectRepository.findById(projectId).get();
     }
 
     private boolean isFieldsAreEmpty(TaskDTO taskDTO) {
-        System.out.println(taskDTO.getName());
-        System.out.println(taskDTO.getDescription());
-        System.out.println(taskDTO.getCreator());
-        System.out.println(taskDTO.getProjectId());
-        System.out.println(taskDTO.getPriority());
-        System.out.println(taskDTO.getStatus());
-        System.out.println(taskDTO.getStartDate());
-        System.out.println(taskDTO.getDueDate());
-        System.out.println(taskDTO.getAssignees());
-        if (taskDTO.getName() == null || taskDTO.getDescription() == null || taskDTO.getPriority() == null
-                || taskDTO.getStatus() == null || taskDTO.getStartDate() == null || taskDTO.getDueDate() == null
+        if (taskDTO.getName() == null || taskDTO.getDescription() == null || taskDTO.getPriority() ==0
+                || taskDTO.getStatus() ==0 || taskDTO.getStartDate() == null || taskDTO.getDueDate() == null
                 || taskDTO.getCreator() == null || taskDTO.getAssignees() == null || taskDTO.getProjectId() == 0) {
             return true;
         }
@@ -136,18 +135,14 @@ public class TaskService {
             throw new InvalidInputException("Please choose a file to upload");
         }
 
+        validator.isValidTask(taskId);
+
         File file = new File();
         file.setName(uploadFile.getOriginalFilename());
         file.setType(uploadFile.getContentType());
         file.setDocument(uploadFile.getBytes());
         file.setUploadedDate(LocalDateTime.now());
-
-        Task task = taskRepository.findById(taskId).get();
-        if (task != null) {
-            file.setTask(task);
-        } else {
-            throw new InvalidInputException("Could not find task");
-        }
+        file.setTask(taskRepository.findById(taskId).get());
 
         fileRepository.save(file);
 
@@ -171,7 +166,6 @@ public class TaskService {
                     TaskAssignment assignment = new TaskAssignment();
                     assignment.setTask(taskRepository.findById(id).get());
                     assignment.setAssignee(user);
-
                     taskAssignmentRepository.save(assignment);
                 } else {
                     throw new InvalidInputException("Already assignee exists for task " + user.getEmail());
@@ -216,7 +210,6 @@ public class TaskService {
     public List<Task> getTasksByCreatorId(String email) {
 
         User user = userRepository.findByEmailIgnoreCase(email);
-
         List<Task> tasks = taskRepository.findByCreatorId(user.getId());
 
         if (tasks.size() == 0) {
@@ -228,9 +221,7 @@ public class TaskService {
     public List<Task> getTasksByAssigneeId(String email) {
 
         User user = userRepository.findByEmailIgnoreCase(email);
-
         List<TaskAssignment> taskAssignments = taskAssignmentRepository.findByAssigneeId(user.getId());
-
         List<Task> tasks = new LinkedList<Task>();
 
         for (TaskAssignment taskAssignment : taskAssignments) {
@@ -242,7 +233,6 @@ public class TaskService {
         }
 
         return tasks;
-
     }
 
     public List<Task> getTasksByDueDate() {
@@ -251,7 +241,6 @@ public class TaskService {
         if (tasks.size() == 0) {
             throw new NoSuchElementException();
         }
-
         return tasks;
     }
 
@@ -276,189 +265,67 @@ public class TaskService {
         return "File " + id + " has been deleted";
     }
 
+    @Transactional
     public String deleteTaskAssigneesById(Long id, String email) {
 
         User user = userRepository.findByEmailIgnoreCase(email);
 
         if (user != null && validator.isValidTaskAssignee(id, user.getId())) {
-
-            System.out.println("deleteTaskAssigneesById" + id + " has been deleted");
-
-            // TaskAssignment assignment =
-            // taskAssignmentRepository.findByTaskIdAndAssigneeId(id, user.getId());
-            // System.out.println();
-            // System.out.println(assignment.getId());
-            // System.out.println();
-
-            // taskAssignmentRepository.deleteById(assignment.getId());
-            taskAssignmentRepository.removeByTaskIdAndAssigneeId(id, user.getId());
-
+            taskAssignmentRepository.deleteByTaskIdAndAssigneeId(id, user.getId());
+        } else {
+            throw new InvalidInputException("Invalid details");
         }
 
         return "Remove assignee " + email + " from task assignment " + id;
     }
 
-    // public String addTask(TaskDTO taskDTO) {
-    // Task task = new Task();
-    // isValidateTask(taskDTO);
-    // isValidDueDate(taskDTO.getDueDate());
-    // isValidateCreatorAndAssignee(taskDTO);
-    // isValidateProject(taskDTO);
+    public String updateTaskStatus(Long id, Status status) {
 
-    // task.setTaskId(taskDTO.getTaskId());
-    // task.setTaskTitle(taskDTO.getTaskTitle());
-    // task.setTaskDescription(taskDTO.getTaskDescription());
-    // task.setPriority(taskDTO.getPriority());
-    // task.setDueDate(taskDTO.getDueDate());
-    // task.setStatus(taskDTO.getStatus());
-    // createTask(task, taskDTO);
-    // taskRepository.save(task);
-    // return "success";
-    // }
+        Task task = taskRepository.findById(id).get();
+        if (task != null) {
+            task.setStatus(status);
+            taskRepository.save(task);
+        } else {
+            throw new InvalidInputException("Task not found");
+        }
 
-    // private Task createTask(Task task, TaskDTO taskDTO) {
-    // User creator = userRepository.findById(taskDTO.getCreatorId()).get();
-    // User assignee = userRepository.findById(taskDTO.getAssigneeId()).get();
-    // Project project = projectRepository.findById(taskDTO.getProjectId()).get();
-    // task.setProject(project);
-    // task.setCreator(creator);
-    // task.setAssignee(assignee);
-    // return task;
-    // }
+        return "Task status updated successfully ";
 
-    // private boolean isValidateProject(TaskDTO taskDTO) {
-    // Project project = projectRepository.findByProjectId(taskDTO.getProjectId());
-    // if (project == null) {
-    // throw new InvalidInputException("601", "Invalid project input , please check
-    // your input");
-    // }
+    }
 
-    // return true;
-    // }
+    public String updateTask(Long id, TaskUpdateDTO taskUpdateDTO) {
 
-    // private boolean isValidateCreatorAndAssignee(TaskDTO taskDTO) {
-    // User creator = userRepository.findByUserId(taskDTO.getCreatorId());
-    // User assignee = userRepository.findByUserId(taskDTO.getAssigneeId());
-    // if (creator == null || assignee == null) {
-    // throw new InvalidInputException("601", "Invalid creator or assignee input ,
-    // please check your input");
+        Task task = taskRepository.findById(id).get();
 
-    // } else if (taskDTO.getCreatorId() == taskDTO.getAssigneeId()) {
-    // throw new InvalidInputException("601", "Invalid creator or assignee input ,
-    // please check your input");
-    // }
+        if (task != null) {
 
-    // return true;
-    // }
+            if (taskUpdateDTO.getParentTaskId() != 0 && taskUpdateDTO.getProjectId() != 0) {
+                validator.isValidParentTask(taskUpdateDTO.getParentTaskId(), taskUpdateDTO.getProjectId());
+            }
+            if (taskUpdateDTO.getName() != null) {
+                task.setName(taskUpdateDTO.getName());
+            }
+            if (taskUpdateDTO.getDescription() != null) {
+                task.setDescription(taskUpdateDTO.getDescription());
+            }
+            if (taskUpdateDTO.getDueDate() != null && validator.isValidDueDate(taskUpdateDTO.getDueDate())) {
+                task.setDueDate(taskUpdateDTO.getDueDate());
+            }
+            if (taskUpdateDTO.getParentTaskId() != 0) {
+                task.setParentTask(taskRepository.findById(taskUpdateDTO.getParentTaskId()).get());
+            }
+            if (taskUpdateDTO.getProjectId() != 0) {
+                task.setProject(projectRepository.findById(taskUpdateDTO.getProjectId()).get());
+            }
 
-    // private boolean isValidateTask(TaskDTO taskDTO) {
+            taskRepository.save(task);
 
-    // if (taskDTO.getTaskTitle().isEmpty() ||
-    // taskDTO.getTaskTitle().length() == 0 ||
-    // taskDTO.getTaskDescription().isEmpty() ||
-    // taskDTO.getTaskDescription().length() == 0) {
-    // throw new InvalidInputException("601", "Inavalid input task , please check
-    // your input");
-    // }
-    // return true;
-    // }
+        } else {
+            throw new InvalidInputException("Task not found");
+        }
 
-    // private boolean isValidDueDate(Date dueDate) {
-    // if (!(dueDate != null && dueDate.after(new Date()))) {
-    // throw new InvalidInputException("601", "Inavalid due date , please check your
-    // input");
-    // }
-    // return true;
+        return "Task Updated";
 
-    // }
+    }
 
-    // public Task findByTaskId(long taskId) {
-    // Task task = taskRepository.findByTaskId(taskId);
-    // if (task == null) {
-    // throw new NoSuchElementException("No value is present in database , Please
-    // change your request");
-    // }
-    // return task;
-    // }
-
-    // public List<Task> findByStatus(Status status) {
-    // List<Task> task = taskRepository.findByStatus(status);
-    // if (task.size() == 0) {
-    // throw new NoSuchElementException("No value is present in database , Please
-    // change your request");
-    // }
-    // return task;
-    // }
-
-    // public List<Task> findByPriority(Priority priority) {
-    // List<Task> task = taskRepository.findByPriority(priority);
-    // if (task.size() == 0) {
-    // throw new NoSuchElementException("No value is present in database , Please
-    // change your request");
-    // }
-    // return task;
-    // }
-
-    // public String updateTask(long taskId, TaskDTO taskDTO) {
-
-    // Task existingTask = taskRepository.findByTaskId(taskId);
-
-    // if (taskDTO.getCreatorId() == 0) {
-    // taskDTO.setCreatorId(existingTask.getCreator().getUserId());
-    // }
-    // if (taskDTO.getAssigneeId() == 0) {
-    // taskDTO.setAssigneeId(existingTask.getAssignee().getUserId());
-    // }
-
-    // if (taskDTO.getTaskTitle() != null && taskDTO.getTaskTitle().length() != 0)
-    // existingTask.setTaskTitle(taskDTO.getTaskTitle());
-
-    // if (taskDTO.getTaskDescription() != null &&
-    // taskDTO.getTaskDescription().length() != 0)
-    // existingTask.setTaskDescription(taskDTO.getTaskDescription());
-
-    // if (isValidateCreatorAndAssignee(taskDTO)) {
-    // existingTask.setCreator(userRepository.findById(taskDTO.getCreatorId()).get());
-    // existingTask.setAssignee(userRepository.findById(taskDTO.getAssigneeId()).get());
-    // }
-    // if (taskDTO.getProjectId() != 0) {
-    // isValidateProject(taskDTO);
-    // existingTask.setProject(projectRepository.findById(taskDTO.getProjectId()).get());
-    // }
-    // if (taskDTO.getDueDate() != null) {
-    // isValidDueDate(taskDTO.getDueDate());
-    // existingTask.setDueDate(taskDTO.getDueDate());
-    // }
-    // if (taskDTO.getPriority() != null) {
-    // existingTask.setPriority(taskDTO.getPriority());
-    // }
-    // if (taskDTO.getStatus() != null) {
-    // existingTask.setStatus(taskDTO.getStatus());
-    // }
-
-    // taskRepository.save(existingTask);
-    // return "Updated";
-    // }
-
-    // public String deleteTask(long taskId) {
-    // Task task = taskRepository.findById(taskId)
-    // .orElseThrow(() -> new EntityNotFoundException("Task not found"));
-    // task.getCreator().getCreatorTask().remove(task);
-    // task.getAssignee().getAssigneTask().remove(task);
-    // task.getProject().getTasks().remove(task);
-    // taskRepository.delete(task);
-    // return "Successsfully deleted";
-    // }
-
-    // public List<Task> findByDuedate() {
-    // Date date = new Date();
-    // List<Task> tasks = taskRepository.findByDueDateBefore(date);
-
-    // if (tasks.size() == 0) {
-    // throw new NoSuchElementException("No value is present in database , Please
-    // change your request");
-    // }
-
-    // return tasks;
-    // }
 }

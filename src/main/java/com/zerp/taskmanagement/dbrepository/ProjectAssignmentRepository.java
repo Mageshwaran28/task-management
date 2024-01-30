@@ -3,7 +3,6 @@ package com.zerp.taskmanagement.dbrepository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.zerp.taskmanagement.dbentity.ProjectAssignment;
@@ -15,7 +14,6 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
 
     List<ProjectAssignment> findByAssigneeId(long id);
 
-    // @Query("delete from ProjectAssignment where project_id = :id and assignee_id = :id2")
     void removeByProjectIdAndAssigneeId(long id, long id2);
 
     

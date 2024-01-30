@@ -7,8 +7,8 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.zerp.taskmanagement.customexception.EmptyInputException;
 import com.zerp.taskmanagement.customexception.InvalidInputException;
@@ -34,7 +34,6 @@ public class ProjectService {
     @Autowired
     UserRepository userRepository;
 
-
     @Autowired
     ProjectAssignmentRepository projectAssignmentRepository;
 
@@ -47,28 +46,24 @@ public class ProjectService {
         project.setName(projectDTO.getName());
         project.setDescription(projectDTO.getDescription());
 
-        User creator = userRepository.findByEmailIgnoreCase(projectDTO.getCreator());
-        if (creator == null) {
-            System.out.println(projectDTO.getCreator());
-            throw new InvalidInputException("Invalid creator email address ");
-        }
-
-        project.setCreator(creator);
+        project.setCreator(getCreator(projectDTO.getCreator()));
         project.setAssignees(getAssignees(projectDTO.getAssignees()));
         projectRepository.save(project);
         return project;
 
     }
 
+    public User getCreator(String creatorEmail){
+        validator.isValidUser(creatorEmail);
+        return userRepository.findByEmailIgnoreCase(creatorEmail);
+    }
+
     public Set<User> getAssignees(Set<String> assigneesName) {
         Set<User> assignees = new HashSet<User>();
 
         for (String email : assigneesName) {
-            User assignee = userRepository.findByEmailIgnoreCase(email);
-            if (assignee == null) {
-                throw new InvalidInputException("Invalid assignee email address:" + email);
-            }
-            assignees.add(assignee);
+            validator.isValidUser(email);
+            assignees.add(userRepository.findByEmailIgnoreCase(email));
         }
 
         return assignees;
@@ -156,18 +151,18 @@ public class ProjectService {
     }
 
     public String updateProject(long id, ProjectUpdateDTO updateProject) {
-        
+
         Project project = projectRepository.findById(id).get();
 
-        if(project == null) {
+        if (project == null) {
             throw new InvalidInputException("Invalid project id: " + id);
         }
 
-        if(updateProject.getName() !=null && updateProject.getName().length() >0){
+        if (updateProject.getName() != null && updateProject.getName().length() > 0) {
             project.setName(updateProject.getName());
         }
 
-        if(updateProject.getDescription() !=null && updateProject.getDescription().length() >0){
+        if (updateProject.getDescription() != null && updateProject.getDescription().length() > 0) {
             project.setDescription(updateProject.getDescription());
         }
 
@@ -176,24 +171,30 @@ public class ProjectService {
         return "Project updated";
     }
 
-    // public String deleteProject(long id) {
-        
-    //     if(validator.isValidProject(id)){
-    //         projectRepository.deleteById(id);
-    //     }
+    public String deleteProject(long id) {
 
-    //     return "Project "+id+" has been deleted";
-    // }
+        if (validator.isValidProject(id)) {
+            projectRepository.deleteById(id);
+        } else {
+            throw new InvalidInputException("Project not found " + id);
+        }
 
-    // public String deleteProjectAssignee(long id, String email) {
+        return "Project " + id + " has been deleted";
+    }
 
-    //     User user = userRepository.findByEmailIgnoreCase(email);
 
-    //     if(user !=null && validator.isValidProjectAssignee(id, user.getId())){
-    //         projectAssignmentRepository.removeByProjectIdAndAssigneeId(id, user.getId());
-    //     }
-        
-    //     return "Remove assignee" + email + " from project " + id;
-    // }
+    @Transactional
+    public String deleteProjectAssignee(long id, String email) {
+
+        User user = userRepository.findByEmailIgnoreCase(email);
+
+        if (user != null && validator.isValidProjectAssignee(id, user.getId())) {
+            projectAssignmentRepository.removeByProjectIdAndAssigneeId(id, user.getId());
+        }else{
+            throw new InvalidInputException("Invalid credentials");
+        }
+
+        return "Remove assignee" + email + " from project " + id;
+    }
 
 }

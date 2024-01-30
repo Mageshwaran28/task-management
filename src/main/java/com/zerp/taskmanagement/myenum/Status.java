@@ -1,13 +1,11 @@
 package com.zerp.taskmanagement.myenum;
 
+import com.zerp.taskmanagement.customexception.InvalidInputException;
 
 public enum Status {
     PENDING("1"),
     PROCESSING("2"),
     COMPLETED("3");
-    // PENDING,
-    // PROCESSING,
-    // COMPLETED;
 
     private final String stringValue;
 
@@ -25,7 +23,7 @@ public enum Status {
                 return status;
             }
         }
-        return null;
+        throw new InvalidInputException("Invalid status id : " + stringValue);
     }
 }
 

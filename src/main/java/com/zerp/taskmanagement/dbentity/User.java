@@ -29,7 +29,6 @@ public class User {
 
     @ManyToOne
     @JoinColumn(name = "role_id")
-    @JsonIgnore
     private Role role;
 
     public long getId() {

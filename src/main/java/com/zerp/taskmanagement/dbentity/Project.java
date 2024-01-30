@@ -5,7 +5,6 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.zerp.taskmanagement.jsonview.View;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

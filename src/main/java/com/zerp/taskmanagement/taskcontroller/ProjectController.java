@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -61,14 +60,14 @@ public class ProjectController {
     }
 
 
-    // @DeleteMapping("projects/{id}")
-    // public String deleteProject(@PathVariable long id){
-    //     return projectService.deleteProject(id);
-    // }
+    @DeleteMapping("projects/{id}")
+    public String deleteProject(@PathVariable long id){
+        return projectService.deleteProject(id);
+    }
 
-    // @DeleteMapping("projects/{id}/assignees/{email}")
-    // public String deleteProjectAssignee(@PathVariable long id, @PathVariable String email){
-    //     return projectService.deleteProjectAssignee(id, email);
-    // }
+    @DeleteMapping("projects/{id}/assignees/{email}")
+    public String deleteProjectAssignee(@PathVariable long id, @PathVariable String email){
+        return projectService.deleteProjectAssignee(id, email);
+    }
 
 }

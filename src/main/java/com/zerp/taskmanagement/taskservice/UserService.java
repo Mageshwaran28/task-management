@@ -17,13 +17,13 @@ import com.zerp.taskmanagement.validation.Validator;
 public class UserService {
 
     @Autowired
+    Validator validator;
+
+    @Autowired
     UserRepository userRepository;
 
     @Autowired
     RoleRepository roleRepository;
-
-    @Autowired
-    Validator validator;
 
     public User addUser(UserDTO userDTO) throws IllegalAccessException {
 
@@ -33,14 +33,11 @@ public class UserService {
         if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new DuplicateInputException();
         }
-        if (!validator.isValidPassword(userDTO.getPassword())) {
-            throw new InvalidInputException(
-                    "Password must be strong, it contains \natleast one lowercase character \nnatleast one  uppercase character \nnatleast one digit \nnatleast one super character ");
-        }
-
         User user = new User();
         user.setEmail(userDTO.getEmail());
-        user.setPassword(userDTO.getPassword());
+        if (validator.isValidPassword(userDTO.getPassword())) {
+            user.setPassword(userDTO.getPassword());
+        }
 
         Role role = roleRepository.findByRole(userDTO.getRole());
 
@@ -49,9 +46,6 @@ public class UserService {
             role.setRole(userDTO.getRole());
         }
         user.setRole(role);
-        System.out.println();
-        System.out.println(user.getEmail()+" "+user.getRole().getRole());
-        System.out.println();
         userRepository.save(user);
 
         return user;
@@ -59,15 +53,7 @@ public class UserService {
 
     private boolean isFieldsAreEmpty(UserDTO userDTO) {
 
-        if (userDTO.getEmail() == null) {
-            return true;
-        }
-
-        if (userDTO.getPassword() == null) {
-            return true;
-        }
-
-        if (userDTO.getRole() == null) {
+        if (userDTO.getEmail() == null || userDTO.getPassword() == null || userDTO.getRole() == null) {
             return true;
         }
 
@@ -81,116 +67,31 @@ public class UserService {
         if (user == null) {
             throw new InvalidInputException("Invalid email or password");
         }
-        if (!validator.isValidPassword(changePasswordDTO.getNewPassword())) {
-            throw new InvalidInputException(
-                    "Password must be strong, it contains \natleast one lowercase character \natleast one  uppercase character \natleast one digit \natleast one super character ");
+        if (validator.isValidPassword(changePasswordDTO.getNewPassword())) {
+            user.setPassword(changePasswordDTO.getNewPassword());
         }
-
-        user.setPassword(changePasswordDTO.getNewPassword());
         userRepository.save(user);
 
         return "Passord changed";
-
     }
-
 
     public String changeUserRole(String email, String newRole) {
-       User user = userRepository.findByEmailIgnoreCase(email);
+        User user = userRepository.findByEmailIgnoreCase(email);
 
-       if(user == null) {
-        throw new InvalidInputException("Invalid email");
-       }
-
-       Role role = roleRepository.findByRole(newRole);
-
-        if (role == null) {
-            role = new Role();
-            role.setRole(newRole);
+        if (user == null) {
+            throw new InvalidInputException("Invalid email");
         }
-        user.setRole(role);
-
+        if (roleRepository.existsByRole(newRole)) {
+            user.setRole(roleRepository.findByRole(newRole));
+        } else {
+            Role role = new Role();
+            role.setRole(newRole);
+            roleRepository.save(role);
+            user.setRole(role);
+        }
         userRepository.save(user);
 
-
-       return "Role updated";
-
+        return "Role updated";
     }
-
-    // public List<User> findAll() {
-
-    // List<User> users = userRepository.findAll();
-
-    // if (users.size() == 0) {
-    // throw new NoSuchElementException("No value is present in database , Please
-    // change your request");
-    // }
-    // return users;
-    // }
-
-    // public User findByUserId(long userId) {
-
-    // User user = userRepository.findByUserId(userId);
-
-    // if (user == null) {
-    // throw new NoSuchElementException("No value is present in database , Please
-    // change your request");
-    // }
-
-    // return user;
-    // }
-
-    // public String updateUser(UpdateUserDTO user, long userId) {
-
-    // User existUser = userRepository.findByUserId(userId);
-
-    // if (userRepository.findByUserName(user.getUserName()) != null) {
-    // throw new InvalidInputException("601", "This user already exists , please
-    // choose another user name");
-
-    // } else if (user.getMobileNumber() != 0 &&
-    // Long.toString(user.getMobileNumber()).length() != 10) {
-
-    // throw new InvalidInputException("601", "Input field is invalid , Please look
-    // into it");
-    // }
-
-    // if (user.getUserName() != null) {
-    // existUser.setUserName(user.getUserName());
-    // }
-    // if (user.getMobileNumber() != 0) {
-    // existUser.setMobileNumber(user.getMobileNumber());
-    // }
-    // if (user.getEmployeeRole() != null) {
-    // existUser.setEmployeeRole(user.getEmployeeRole());
-    // }
-
-    // userRepository.save(existUser);
-
-    // return "Updated";
-    // }
-
-    // public String changeUserPassword(long userId, ChangePasswordDTO
-    // changePassword) {
-
-    // User user = userRepository.findByUserId(userId);
-    // if (user == null) {
-    // throw new NoSuchElementException("No value is present in database , Please
-    // change your request");
-    // }
-    // if (user.getPassword().equals(changePassword.getCurrentPassword()) &&
-    // changePassword.getNewPassword().length()>6) {
-    // user.setPassword(changePassword.getNewPassword());
-    // } else if (changePassword.getNewPassword().length() < 6) {
-    // throw new InvalidInputException("601", "Password length is minimum 6
-    // characters");
-    // } else {
-    // throw new InvalidInputException("601", "Passwords do not match , enter valid
-    // password");
-    // }
-
-    // userRepository.save(user);
-
-    // return "Successfully changed";
-    // }
 
 }

@@ -2,23 +2,16 @@ package com.zerp.taskmanagement.dto;
 
 public class UpdateUserDTO {
 
-    private String email;
-    private String roleId;
+    private String role;
 
-    public String getEmail() {
-        return email;
+    public String getRole() {
+        return role;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setRole(String role) {
+        this.role = role;
     }
 
-    public String getRoleId() {
-        return roleId;
-    }
-
-    public void setRoleId(String roleId) {
-        this.roleId = roleId;
-    }
+   
 
 }

@@ -1,5 +1,6 @@
 package com.zerp.taskmanagement.myenum;
 
+import com.zerp.taskmanagement.customexception.InvalidInputException;
 
 public enum Priority {
     HIGH("1"),
@@ -10,6 +11,7 @@ public enum Priority {
 
     Priority(String stringValue) {
         this.stringValue = stringValue;
+
     }
 
     public String getStringValue() {
@@ -22,8 +24,7 @@ public enum Priority {
                 return priority;
             }
         }
-        return null;
+        throw new InvalidInputException("Invalid priority id : " + stringValue);
     }
+
 }
-
-

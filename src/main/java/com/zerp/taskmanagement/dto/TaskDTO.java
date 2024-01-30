@@ -3,14 +3,11 @@ package com.zerp.taskmanagement.dto;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-import com.zerp.taskmanagement.myenum.Priority;
-import com.zerp.taskmanagement.myenum.Status;
-
 public class TaskDTO {
     private String name;
     private String description;
-    private Priority priority;
-    private Status status;
+    private int priority;
+    private int status;
     private LocalDateTime startDate;
     private LocalDateTime dueDate;
     private String creator;
@@ -34,19 +31,19 @@ public class TaskDTO {
         this.description = description;
     }
 
-    public Priority getPriority() {
+    public int getPriority() {
         return priority;
     }
 
-    public void setPriority(Priority priority) {
+    public void setPriority(int priority) {
         this.priority = priority;
     }
 
-    public Status getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 
@@ -97,7 +94,5 @@ public class TaskDTO {
     public void setParentTaskId(long parentTaskId) {
         this.parentTaskId = parentTaskId;
     }
-
-    
 
 }
