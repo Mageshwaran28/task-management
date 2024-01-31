@@ -4,7 +4,6 @@ import java.util.NoSuchElementException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,11 +36,6 @@ public class MyControllerAdvice {
     public ResponseEntity<String> handleNoSuchField(NoSuchElementException noSuchElementException){
         return new ResponseEntity<>("No value is present in database , Please change your request" , HttpStatus.NOT_FOUND );
     }
-
-    // @ExceptionHandler(HttpMessageNotReadableException.class)
-    // public ResponseEntity<String> handleDefaultException(HttpMessageNotReadableException resolverException){
-    //     return new ResponseEntity<>("Invalid status or priority , please check your input" , HttpStatus.NOT_FOUND );
-    // }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<String> handleMEntityNotSupportedException(HttpRequestMethodNotSupportedException resolverException){
