@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.zerp.taskmanagement.jsonview.View;
 import com.zerp.taskmanagement.myenum.Priority;
 import com.zerp.taskmanagement.myenum.Status;
 
@@ -32,17 +30,13 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @JsonView(value = { View.withOutChild.class })
     private String name;
 
-    @JsonView(value = { View.withOutChild.class })
     private String description;
 
-    @JsonView(value = { View.withOutChild.class })
     @Enumerated(EnumType.STRING)
     private Priority priority;
 
-    @JsonView(value = { View.withOutChild.class })
     @Enumerated(EnumType.STRING)
     private Status status;
 
@@ -57,7 +51,6 @@ public class Task {
     private List<File> files;
 
     @OneToMany(mappedBy = "parentTask")
-    @JsonView(value = { View.withChild.class })
     private List<Task> childList;
 
     @ManyToOne
@@ -67,21 +60,18 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name = "creator_id", referencedColumnName = "id")
-    @JsonView(value = { View.withOutChild.class })
     private User creator;
 
     @ManyToMany
     @JoinTable(name = "task_assignments", joinColumns = {
             @JoinColumn(name = "task_id", referencedColumnName = "id") }, inverseJoinColumns = {
                     @JoinColumn(name = "assignee_id", referencedColumnName = "id") })
-    @JsonView(value = { View.withOutChild.class })
     private Set<User> assignees;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinTable(name = "project_task_assignments", joinColumns = {
             @JoinColumn(name = "task_id", referencedColumnName = "id") }, inverseJoinColumns = {
                     @JoinColumn(name = "project_id", referencedColumnName = "id") })
-    @JsonView(value = { View.withOutChild.class })
     Project project;
 
     public long getId() {
