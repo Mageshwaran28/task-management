@@ -14,6 +14,7 @@ create table users (
     email varchar(320) unique not null,
     role_id bigint not null,
     password varchar(16) not null check(char_length(password)>=6 and char_length(password)<=16) ,
+    ip_address varchar(15) not null,
     constraint users_fk_role_id
     foreign key(role_id) references roles(id)
      on update cascade

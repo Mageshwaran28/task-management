@@ -1,6 +1,13 @@
 package com.zerp.taskmanagement.taskservice;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.zerp.taskmanagement.customexception.DuplicateInputException;
@@ -14,7 +21,7 @@ import com.zerp.taskmanagement.dto.UserDTO;
 import com.zerp.taskmanagement.validation.Validator;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     @Autowired
     Validator validator;
@@ -25,7 +32,20 @@ public class UserService {
     @Autowired
     RoleRepository roleRepository;
 
-    public User addUser(UserDTO userDTO) throws IllegalAccessException {
+     @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User userInfo = userRepository.findByEmailIgnoreCase(username);
+        if (userInfo != null) {
+            return new UserInfoDetailsService(userInfo);
+        } else {
+            throw new UsernameNotFoundException("User not found"+username);
+        }
+    }
+
+    public User addUser(UserDTO userDTO) throws IllegalAccessException, UnknownHostException {
 
         if (isFieldsAreEmpty(userDTO)) {
             throw new InvalidInputException("Input fields are empty");
@@ -36,16 +56,21 @@ public class UserService {
         User user = new User();
         user.setEmail(userDTO.getEmail());
         if (validator.isValidPassword(userDTO.getPassword())) {
-            user.setPassword(userDTO.getPassword());
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         }
 
         Role role = roleRepository.findByRole(userDTO.getRole());
 
         if (role == null) {
             role = new Role();
-            role.setRole(userDTO.getRole());
+            role.setRole(userDTO.getRole().toUpperCase());
+            roleRepository.save(role);
         }
         user.setRole(role);
+
+        InetAddress address = InetAddress.getLocalHost();
+        user.setIpAddress(address.getHostAddress());
+
         userRepository.save(user);
 
         return user;

@@ -24,6 +24,8 @@ public class User {
     @JsonIgnore
     private String password;
 
+    private String ipAddress;
+
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
@@ -59,6 +61,15 @@ public class User {
     public void setRole(Role role) {
         this.role = role;
     }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
+    }
   
+    
 
 }
