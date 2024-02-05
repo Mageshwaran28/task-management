@@ -49,7 +49,6 @@ public class UserController {
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
         if (authenticate.isAuthenticated()) {
-            System.out.println(authRequest.getEmail());
             return jwtService.generateToken(authRequest.getEmail());
         } else {
             throw new InvalidInputException("Invalid login");
