@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.zerp.taskmanagement.taskservice.JwtService;
-import com.zerp.taskmanagement.taskservice.UserInfoService;
+import com.zerp.taskmanagement.taskservice.UserService;
 
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.FilterChain;
@@ -23,7 +23,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtService jwtService;
     
     @Autowired
-    private UserInfoService userInfoService;
+    private UserService userService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -36,7 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
             userName = jwtService.extractUserName(token);
         }
         if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userInfoService.loadUserByUsername(userName);
+            UserDetails userDetails = userService.loadUserByUsername(userName);
             if (jwtService.validateToken(token, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
                         null, userDetails.getAuthorities());
