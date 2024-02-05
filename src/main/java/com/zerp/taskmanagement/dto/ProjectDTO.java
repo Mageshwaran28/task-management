@@ -6,8 +6,7 @@ public class ProjectDTO {
 
     private String name;
     private String description;
-    private String creator;
-    private Set<String> assignees;
+    private Set<Long> assignees;
 
     public String getName() {
         return name;
@@ -25,19 +24,11 @@ public class ProjectDTO {
         this.description = description;
     }
 
-    public String getCreator() {
-        return creator;
-    }
-
-    public void setCreator(String creator) {
-        this.creator = creator;
-    }
-
-    public Set<String> getAssignees() {
+    public Set<Long> getAssignees() {
         return assignees;
     }
 
-    public void setAssignees(Set<String> assignees) {
+    public void setAssignees(Set<Long> assignees) {
         this.assignees = assignees;
     }
 

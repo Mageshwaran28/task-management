@@ -1,6 +1,7 @@
 package com.zerp.taskmanagement.validation;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,12 +10,16 @@ import org.springframework.stereotype.Component;
 
 import com.zerp.taskmanagement.customexception.InvalidInputException;
 import com.zerp.taskmanagement.dbentity.Task;
+import com.zerp.taskmanagement.dbentity.User;
 import com.zerp.taskmanagement.dbrepository.FileRepository;
 import com.zerp.taskmanagement.dbrepository.ProjectAssignmentRepository;
 import com.zerp.taskmanagement.dbrepository.ProjectRepository;
 import com.zerp.taskmanagement.dbrepository.TaskAssignmentRepository;
 import com.zerp.taskmanagement.dbrepository.TaskRepository;
 import com.zerp.taskmanagement.dbrepository.UserRepository;
+import com.zerp.taskmanagement.taskservice.JwtService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Component
 public class Validator {
@@ -45,12 +50,15 @@ public class Validator {
     @Autowired
     ProjectAssignmentRepository projectAssignmentRepository;
 
-    public boolean isValidUser(String email) {
-        if(userRepository.existsByEmailIgnoreCase(email)){
+    @Autowired 
+    JwtService jwtService;
+
+    public boolean isValidUser(Long id) {
+        if(userRepository.existsById(id)){
             return true;
         }
         else{
-            throw new InvalidInputException("Invalid email address : " + email);
+            throw new InvalidInputException("Invalid user id : " + id);
         }
     }
 
@@ -134,6 +142,28 @@ public class Validator {
         } else {
             throw new InvalidInputException("The project id is must be same in both parent and child tasks.");
         }
+    }
+
+    public String getUserEmail(HttpServletRequest request){
+        String authHeader = request.getHeader("Authorization");
+        String token = null;
+        String userName = null;
+        if (authHeader != null && authHeader.startsWith("Bearer")) {
+            token = authHeader.substring(7);
+            userName = jwtService.extractUserName(token);
+        }
+
+        return userName;
+    }
+
+    public boolean isExistAssignee(Task task, String loginUser) {
+        Set<User> assignees = task.getAssignees();
+        for (User user : assignees) {
+            if(loginUser.equals(user.getEmail())){
+                return true;
+            }
+        }
+        return false;
     }
 
 }

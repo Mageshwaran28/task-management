@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.zerp.taskmanagement.customexception.DuplicateInputException;
 import com.zerp.taskmanagement.customexception.EmptyInputException;
 import com.zerp.taskmanagement.customexception.InvalidInputException;
+import com.zerp.taskmanagement.customexception.UnAuthorizeException;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -45,6 +46,11 @@ public class MyControllerAdvice {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException entityNotFoundException){
         return new ResponseEntity<>("The requested entity is not found , please check the requested entity" , HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UnAuthorizeException.class)
+    public ResponseEntity<String> handleUnAuthorizeException(UnAuthorizeException exception){
+        return new ResponseEntity<String>(exception.getErrorMessage(),HttpStatus.FORBIDDEN);
     }
 
 }

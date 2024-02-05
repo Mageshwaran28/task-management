@@ -10,8 +10,7 @@ public class TaskDTO {
     private int status;
     private LocalDateTime startDate;
     private LocalDateTime dueDate;
-    private String creator;
-    private Set<String> assignees;
+    private Set<Long> assignees;
     private long projectId;
     private long parentTaskId;
 
@@ -63,22 +62,6 @@ public class TaskDTO {
         this.dueDate = dueDate;
     }
 
-    public String getCreator() {
-        return creator;
-    }
-
-    public void setCreator(String creator) {
-        this.creator = creator;
-    }
-
-    public Set<String> getAssignees() {
-        return assignees;
-    }
-
-    public void setAssignees(Set<String> assignees) {
-        this.assignees = assignees;
-    }
-
     public long getProjectId() {
         return projectId;
     }
@@ -93,6 +76,14 @@ public class TaskDTO {
 
     public void setParentTaskId(long parentTaskId) {
         this.parentTaskId = parentTaskId;
+    }
+
+    public Set<Long> getAssignees() {
+        return assignees;
+    }
+
+    public void setAssignees(Set<Long> assignees) {
+        this.assignees = assignees;
     }
 
 }

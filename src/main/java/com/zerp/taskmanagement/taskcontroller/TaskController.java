@@ -27,6 +27,8 @@ import com.zerp.taskmanagement.myenum.Priority;
 import com.zerp.taskmanagement.myenum.Status;
 import com.zerp.taskmanagement.taskservice.TaskService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 public class TaskController {
 
@@ -34,26 +36,26 @@ public class TaskController {
     TaskService taskService;
 
     @PostMapping("/tasks")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public Task createTask(@RequestBody TaskDTO taskDTO) {
-        return taskService.createTask(taskDTO);
+    public Task createTask(@RequestBody TaskDTO taskDTO, HttpServletRequest request) {
+        return taskService.createTask(taskDTO, request);
     }
 
     @GetMapping("/tasks")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public List<Task> getTasks() {
         return taskService.getTasks();
     }
 
     @PostMapping("/tasks/{id}/upload")
-    public File uploadFile(@PathVariable() Long id, @RequestParam("file") MultipartFile uploadFile)
+    public File uploadFile(@PathVariable() Long id, @RequestParam("file") MultipartFile uploadFile, HttpServletRequest request)
             throws IOException {
-        return taskService.uploadFile(id, uploadFile);
+        return taskService.uploadFile(id, uploadFile, request);
     }
 
     @GetMapping("files/{id}")
-    public ResponseEntity<?> getFile(@PathVariable("id") Long id) throws IOException {
+    public ResponseEntity<?> getFile(@PathVariable("id") Long id , HttpServletRequest request) throws IOException {
 
-        File receivedFile = taskService.getFile(id);
+        File receivedFile = taskService.getFile(id, request);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.valueOf(receivedFile.getType()))
@@ -61,66 +63,69 @@ public class TaskController {
     }
 
     @PostMapping("/tasks/{id}/assignees")
-    public String createAssignee(@PathVariable long id, @RequestBody Set<String> emails) {
-        return taskService.createAssignee(id, emails);
+    public String createAssignee(@PathVariable long id, @RequestBody Set<Long> assigneesId, HttpServletRequest request) {
+        return taskService.createAssignee(id, assigneesId, request);
     }
 
     @GetMapping("/tasks/{id}")
-    public Task geTask(@PathVariable Long id) {
-        return taskService.geTask(id);
+    public Task geTask(@PathVariable Long id, HttpServletRequest request) {
+        return taskService.geTask(id, request);
     }
 
     @GetMapping("/tasks/priority/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public List<Task> getTasksByPriority(@PathVariable String id) {
         Priority priority = Priority.fromString(id);
         return taskService.getTasksByPriority(priority);
     }
 
     @GetMapping("/tasks/status/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public List<Task> getTasksByStatus(@PathVariable String id) {
         Status status = Status.fromString(id);
         return taskService.getTasksByStatus(status);
     }
 
-    @GetMapping("tasks/creators/{email}")
-    public List<Task> getTasksByCreatorId(@PathVariable String email) {
-        return taskService.getTasksByCreatorId(email);
+    @GetMapping("tasks/creators")
+    public List<Task> getTasksByCreatorId(HttpServletRequest request) {
+        return taskService.getTasksByCreatorId(request);
     }
 
-    @GetMapping("tasks/assignees/{email}")
-    public List<Task> getTasksByAssigneeId(@PathVariable String email) {
-        return taskService.getTasksByAssigneeId(email);
+    @GetMapping("tasks/assignees")
+    public List<Task> getTasksByAssigneeId(HttpServletRequest request) {
+        return taskService.getTasksByAssigneeId(request);
     }
 
     @GetMapping("tasks/due")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public List<Task> getTasksByDueDate() {
         return taskService.getTasksByDueDate();
     }
 
     @DeleteMapping("tasks/{id}")
-    public String deleteTaskById(@PathVariable Long id) {
-        return taskService.deleteTaskById(id);
+    public String deleteTaskById(@PathVariable Long id, HttpServletRequest request) {
+        return taskService.deleteTaskById(id, request);
     }
 
     @DeleteMapping("files/{id}")
-    public String deleteTaskFileById(@PathVariable Long id) {
-        return taskService.deleteTaskFileById(id);
+    public String deleteTaskFileById(@PathVariable Long id, HttpServletRequest request) {
+        return taskService.deleteTaskFileById(id, request);
     }
 
-    @DeleteMapping("tasks/{id}/assignees/{email}")
-    public String deleteTaskAssigneesById(@PathVariable Long id, @PathVariable String email) {
-        return taskService.deleteTaskAssigneesById(id, email);
+    @DeleteMapping("tasks/{id}/assignees/{assigneeId}")
+    public String deleteTaskAssigneesById(@PathVariable Long id, @PathVariable Long assigneeId, HttpServletRequest request) {
+        return taskService.deleteTaskAssigneesById(id, assigneeId, request);
     }
 
     @PutMapping("/tasks/{id}/status/{statusId}")
-    public String updateTaskStatus(@PathVariable Long id, @PathVariable String statusId) {
+    public String updateTaskStatus(@PathVariable Long id, @PathVariable String statusId, HttpServletRequest request)  {
         Status status = Status.fromString(statusId);
-        return taskService.updateTaskStatus(id, status);
+        return taskService.updateTaskStatus(id, status, request);
     }
 
     @PutMapping("tasks/{id}")
-    public String updatetask(@PathVariable Long id, @RequestBody TaskUpdateDTO taskUpdateDTO) {
-        return taskService.updateTask(id, taskUpdateDTO);
+    public String updatetask(@PathVariable Long id, @RequestBody TaskUpdateDTO taskUpdateDTO, HttpServletRequest request) {
+        return taskService.updateTask(id, taskUpdateDTO, request);
     }
 
 }

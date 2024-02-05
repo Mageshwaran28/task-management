@@ -20,6 +20,8 @@ import com.zerp.taskmanagement.dto.ChangePasswordDTO;
 import com.zerp.taskmanagement.dto.UserDTO;
 import com.zerp.taskmanagement.validation.Validator;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Service
 public class UserService implements UserDetailsService {
 
@@ -85,27 +87,28 @@ public class UserService implements UserDetailsService {
         return false;
     }
 
-    public String changePassword(String email, ChangePasswordDTO changePasswordDTO) {
-
-        User user = userRepository.findByEmailAndPassword(email, changePasswordDTO.getCurrentPassword());
-
+    public String changePassword(ChangePasswordDTO changePasswordDTO , HttpServletRequest request) {
+        String email = validator.getUserEmail(request);
+       
+        User user = userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             throw new InvalidInputException("Invalid email or password");
-        }
+        }    
         if (validator.isValidPassword(changePasswordDTO.getNewPassword())) {
-            user.setPassword(changePasswordDTO.getNewPassword());
+            user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
         }
         userRepository.save(user);
 
         return "Passord changed";
     }
 
-    public String changeUserRole(String email, String newRole) {
+    public String changeUserRole(String newRole, HttpServletRequest request) {
+       
+        String email = validator.getUserEmail(request);
         User user = userRepository.findByEmailIgnoreCase(email);
-
         if (user == null) {
             throw new InvalidInputException("Invalid email");
-        }
+        }   
         if (roleRepository.existsByRole(newRole)) {
             user.setRole(roleRepository.findByRole(newRole));
         } else {

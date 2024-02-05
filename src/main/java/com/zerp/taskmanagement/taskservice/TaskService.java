@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.zerp.taskmanagement.customexception.EmptyInputException;
 import com.zerp.taskmanagement.customexception.InvalidInputException;
+import com.zerp.taskmanagement.customexception.UnAuthorizeException;
 import com.zerp.taskmanagement.dbentity.File;
 import com.zerp.taskmanagement.dbentity.Project;
 import com.zerp.taskmanagement.dbentity.Task;
@@ -29,6 +30,7 @@ import com.zerp.taskmanagement.myenum.Priority;
 import com.zerp.taskmanagement.myenum.Status;
 import com.zerp.taskmanagement.validation.Validator;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -55,7 +57,7 @@ public class TaskService {
     @Autowired
     TaskAssignmentRepository taskAssignmentRepository;
 
-    public Task createTask(TaskDTO taskDTO) {
+    public Task createTask(TaskDTO taskDTO, HttpServletRequest request) {
 
         if (isFieldsAreEmpty(taskDTO)) {
             throw new EmptyInputException();
@@ -77,7 +79,7 @@ public class TaskService {
             task.setDueDate(taskDTO.getDueDate());
         }
 
-        task.setCreator(projectService.getCreator(taskDTO.getCreator()));
+        task.setCreator(projectService.getCreator(validator.getUserEmail(request)));
         task.setAssignees(projectService.getAssignees(taskDTO.getAssignees()));
         task.setProject(getProject(taskDTO.getProjectId()));
 
@@ -109,9 +111,9 @@ public class TaskService {
     }
 
     private boolean isFieldsAreEmpty(TaskDTO taskDTO) {
-        if (taskDTO.getName() == null || taskDTO.getDescription() == null || taskDTO.getPriority() ==0
-                || taskDTO.getStatus() ==0 || taskDTO.getStartDate() == null || taskDTO.getDueDate() == null
-                || taskDTO.getCreator() == null || taskDTO.getAssignees() == null || taskDTO.getProjectId() == 0) {
+        if (taskDTO.getName() == null || taskDTO.getDescription() == null || taskDTO.getPriority() == 0
+                || taskDTO.getStatus() == 0 || taskDTO.getStartDate() == null || taskDTO.getDueDate() == null
+                || taskDTO.getAssignees() == null || taskDTO.getProjectId() == 0) {
             return true;
         }
 
@@ -129,7 +131,7 @@ public class TaskService {
         return tasks;
     }
 
-    public File uploadFile(Long taskId, MultipartFile uploadFile) throws IOException {
+    public File uploadFile(Long taskId, MultipartFile uploadFile, HttpServletRequest request) throws IOException {
 
         if (uploadFile.isEmpty()) {
             throw new InvalidInputException("Please choose a file to upload");
@@ -137,29 +139,55 @@ public class TaskService {
 
         validator.isValidTask(taskId);
 
-        File file = new File();
-        file.setName(uploadFile.getOriginalFilename());
-        file.setType(uploadFile.getContentType());
-        file.setDocument(uploadFile.getBytes());
-        file.setUploadedDate(LocalDateTime.now());
-        file.setTask(taskRepository.findById(taskId).get());
+        String loginUser = validator.getUserEmail(request);
+        Task task = taskRepository.findById(taskId).get();
+        if (loginUser.equals(task.getCreator().getEmail()) || validator.isExistAssignee(task, loginUser)) {
+            File file = new File();
+            file.setName(uploadFile.getOriginalFilename());
+            file.setType(uploadFile.getContentType());
+            file.setDocument(uploadFile.getBytes());
+            file.setUploadedDate(LocalDateTime.now());
+            file.setTask(taskRepository.findById(taskId).get());
+            file.setUploadedBy(projectService.getCreator(loginUser));
 
-        fileRepository.save(file);
+            fileRepository.save(file);
 
-        return file;
+            return file;
+        }
+
+        throw new UnAuthorizeException("Don't have permission to upload file");
+
     }
 
-    public File getFile(Long id) {
+    public File getFile(Long id, HttpServletRequest request) {
 
         File recievedFile = fileRepository.findById(id).get();
-        return recievedFile;
+
+        if (recievedFile == null) {
+            throw new InvalidInputException("File not found: " + id);
+        }
+
+        Task task = recievedFile.getTask();
+        String loginUser = validator.getUserEmail(request);
+        if (loginUser.equals(task.getCreator().getEmail()) || validator.isExistAssignee(task, loginUser)) {
+            return recievedFile;
+        }
+
+        throw new UnAuthorizeException("Don't have permission to view this file " + id);
+
     }
 
-    public String createAssignee(long id, Set<String> emais) {
+    public String createAssignee(long id, Set<Long> assigneesId, HttpServletRequest request) {
 
-        if (validator.isValidTask(id)) {
+        Task task = taskRepository.findById(id).get();
 
-            Set<User> users = projectService.getAssignees(emais);
+        if (task != null) {
+            String loginUser = validator.getUserEmail(request);
+            if (!loginUser.equals(task.getCreator().getEmail())) {
+                throw new UnAuthorizeException("Don't have permission to create assignees for this task." + id);
+            }
+
+            Set<User> users = projectService.getAssignees(assigneesId);
 
             for (User user : users) {
                 if (!validator.isValidTaskAssignee(id, user.getId())) {
@@ -178,14 +206,18 @@ public class TaskService {
 
     }
 
-    public Task geTask(Long id) {
+    public Task geTask(Long id, HttpServletRequest request) {
         Task task = taskRepository.findById(id).get();
 
         if (task == null) {
             throw new NoSuchElementException();
         }
+        String loginUser = validator.getUserEmail(request);
+        if (loginUser.equals(task.getCreator().getEmail()) || validator.isExistAssignee(task, loginUser)) {
+            return task;
+        }
 
-        return task;
+        throw new UnAuthorizeException("Don't have permission to view this task" + id);
     }
 
     public List<Task> getTasksByPriority(Priority priority) {
@@ -207,7 +239,9 @@ public class TaskService {
         return tasks;
     }
 
-    public List<Task> getTasksByCreatorId(String email) {
+    public List<Task> getTasksByCreatorId(HttpServletRequest request) {
+
+        String email = validator.getUserEmail(request);
 
         User user = userRepository.findByEmailIgnoreCase(email);
         List<Task> tasks = taskRepository.findByCreatorId(user.getId());
@@ -218,8 +252,8 @@ public class TaskService {
         return tasks;
     }
 
-    public List<Task> getTasksByAssigneeId(String email) {
-
+    public List<Task> getTasksByAssigneeId(HttpServletRequest request) {
+        String email = validator.getUserEmail(request);
         User user = userRepository.findByEmailIgnoreCase(email);
         List<TaskAssignment> taskAssignments = taskAssignmentRepository.findByAssigneeId(user.getId());
         List<Task> tasks = new LinkedList<Task>();
@@ -244,9 +278,15 @@ public class TaskService {
         return tasks;
     }
 
-    public String deleteTaskById(Long id) {
+    public String deleteTaskById(Long id, HttpServletRequest request) {
 
-        if (validator.isValidTask(id)) {
+        Task task = taskRepository.findById(id).get();
+        if (task != null) {
+            String loginUser = validator.getUserEmail(request);
+            if (!loginUser.equals(task.getCreator().getEmail())) {
+                throw new UnAuthorizeException("Don't have permission to delete this task " + id);
+            }
+
             taskRepository.deleteById(id);
         } else {
             throw new InvalidInputException("Invalid task id: " + id);
@@ -255,8 +295,15 @@ public class TaskService {
         return "Task " + id + " has been deleted";
     }
 
-    public String deleteTaskFileById(Long id) {
-        if (validator.isValidFile(id)) {
+    public String deleteTaskFileById(Long id, HttpServletRequest request) {
+        File file = fileRepository.findById(id).get();
+        if (file != null) {
+
+            String loginUser = validator.getUserEmail(request);
+            if (!loginUser.equals(file.getUploadedBy().getEmail())) {
+                throw new UnAuthorizeException("Don't have permission to delete this file" + id);
+            }
+
             fileRepository.deleteById(id);
         } else {
             throw new InvalidInputException("Invalid file id: " + id);
@@ -266,38 +313,54 @@ public class TaskService {
     }
 
     @Transactional
-    public String deleteTaskAssigneesById(Long id, String email) {
+    public String deleteTaskAssigneesById(Long id, Long assigneeId, HttpServletRequest request) {
 
-        User user = userRepository.findByEmailIgnoreCase(email);
-
+        User user = userRepository.findById(assigneeId).get();
+        Task task = taskRepository.findById(id).get();
         if (user != null && validator.isValidTaskAssignee(id, user.getId())) {
+            String loginUser = validator.getUserEmail(request);
+
+            if (!loginUser.equals(task.getCreator().getEmail())) {
+                throw new UnAuthorizeException("Don't have permission to delete assignee from this task" + id);
+            }
+
             taskAssignmentRepository.deleteByTaskIdAndAssigneeId(id, user.getId());
         } else {
             throw new InvalidInputException("Invalid details");
         }
 
-        return "Remove assignee " + email + " from task assignment " + id;
+        return "Remove assignee " + assigneeId + " from task assignment " + id;
     }
 
-    public String updateTaskStatus(Long id, Status status) {
+    public String updateTaskStatus(Long id, Status status, HttpServletRequest request) {
 
         Task task = taskRepository.findById(id).get();
         if (task != null) {
-            task.setStatus(status);
-            taskRepository.save(task);
+            String loginUser = validator.getUserEmail(request);
+            if (loginUser.equals(task.getCreator().getEmail()) || validator.isExistAssignee(task, loginUser)) {
+                task.setStatus(status);
+                taskRepository.save(task);
+                return "Task status updated successfully ";
+            }
+
+            throw new UnAuthorizeException("Don't have permission to update status of this task." + id);
+
         } else {
             throw new InvalidInputException("Task not found");
         }
 
-        return "Task status updated successfully ";
-
     }
 
-    public String updateTask(Long id, TaskUpdateDTO taskUpdateDTO) {
+    public String updateTask(Long id, TaskUpdateDTO taskUpdateDTO, HttpServletRequest request) {
 
         Task task = taskRepository.findById(id).get();
 
         if (task != null) {
+
+            String loginUser = validator.getUserEmail(request);
+            if(!loginUser.equals(task.getCreator().getEmail()) ){
+                throw new InvalidInputException("Don't have permission to update this task. "+id);
+            }
 
             if (taskUpdateDTO.getParentTaskId() != 0 && taskUpdateDTO.getProjectId() != 0) {
                 validator.isValidParentTask(taskUpdateDTO.getParentTaskId(), taskUpdateDTO.getProjectId());

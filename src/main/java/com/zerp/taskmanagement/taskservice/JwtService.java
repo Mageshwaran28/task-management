@@ -4,9 +4,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.Key;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,18 +30,14 @@ public class JwtService {
     public String generateToken(String userName) throws UnknownHostException {
         InetAddress address = InetAddress.getLocalHost();
         String ipAddress = address.getHostAddress();
-        System.out.println("ip"+ ipAddress);
+        
         String registeredAddress = userInfoRepository.findByEmailIgnoreCase(userName).getIpAddress();
-
-        System.out.println("registeredAddress"+ registeredAddress);
 
         if(!registeredAddress.equals(ipAddress)){
             throw new UnknownHostException("Invalid IP address");
         }
 
-        Map<String, Objects> claims = new HashMap<>();
         return Jwts.builder()
-                .setClaims(claims)
                 .claim("address", ipAddress)
                 .setSubject(userName)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -92,7 +85,7 @@ public class JwtService {
         String localAddress = address.getHostAddress();
 
         if(!localAddress.equals(loginedAddress)){
-            throw new UnknownHostException("Invalid local address");
+            throw new UnknownHostException("Invalid Ip address");
         }
 
         return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));

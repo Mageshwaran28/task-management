@@ -32,6 +32,10 @@ public class File {
     private byte[] document;
     private LocalDateTime uploadedDate;
 
+    @ManyToOne
+    @JoinColumn(name = "uploader_id")
+    private User uploadedBy;
+
     public long getId() {
         return id;
     }
@@ -84,5 +88,15 @@ public class File {
     public void setUploadedDate(LocalDateTime uploadedDate) {
         this.uploadedDate = uploadedDate;
     }
+
+    public User getUploadedBy() {
+        return uploadedBy;
+    }
+
+    public void setUploadedBy(User uploadedBy) {
+        this.uploadedBy = uploadedBy;
+    }
+
+    
 
 }

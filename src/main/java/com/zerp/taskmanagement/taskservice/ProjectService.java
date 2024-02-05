@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.zerp.taskmanagement.customexception.EmptyInputException;
 import com.zerp.taskmanagement.customexception.InvalidInputException;
+import com.zerp.taskmanagement.customexception.UnAuthorizeException;
 import com.zerp.taskmanagement.dbentity.Project;
 import com.zerp.taskmanagement.dbentity.ProjectAssignment;
 import com.zerp.taskmanagement.dbentity.User;
@@ -21,6 +22,8 @@ import com.zerp.taskmanagement.dbrepository.UserRepository;
 import com.zerp.taskmanagement.dto.ProjectDTO;
 import com.zerp.taskmanagement.dto.ProjectUpdateDTO;
 import com.zerp.taskmanagement.validation.Validator;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class ProjectService {
@@ -37,7 +40,7 @@ public class ProjectService {
     @Autowired
     ProjectAssignmentRepository projectAssignmentRepository;
 
-    public Project createProject(ProjectDTO projectDTO) {
+    public Project createProject(ProjectDTO projectDTO,HttpServletRequest request) {
         if (isFieldsAreEmpty(projectDTO)) {
             throw new EmptyInputException();
         }
@@ -46,7 +49,7 @@ public class ProjectService {
         project.setName(projectDTO.getName());
         project.setDescription(projectDTO.getDescription());
 
-        project.setCreator(getCreator(projectDTO.getCreator()));
+        project.setCreator(getCreator(validator.getUserEmail(request)));
         project.setAssignees(getAssignees(projectDTO.getAssignees()));
         projectRepository.save(project);
         return project;
@@ -54,16 +57,15 @@ public class ProjectService {
     }
 
     public User getCreator(String creatorEmail){
-        validator.isValidUser(creatorEmail);
         return userRepository.findByEmailIgnoreCase(creatorEmail);
     }
 
-    public Set<User> getAssignees(Set<String> assigneesName) {
+    public Set<User> getAssignees(Set<Long> assigneesId) {
         Set<User> assignees = new HashSet<User>();
 
-        for (String email : assigneesName) {
-            validator.isValidUser(email);
-            assignees.add(userRepository.findByEmailIgnoreCase(email));
+        for (long id : assigneesId) {
+            validator.isValidUser(id);
+            assignees.add(userRepository.findById(id).get());
         }
 
         return assignees;
@@ -71,7 +73,7 @@ public class ProjectService {
 
     private boolean isFieldsAreEmpty(ProjectDTO projectDTO) {
 
-        if (projectDTO.getName() == null || projectDTO.getDescription() == null || projectDTO.getCreator() == null
+        if (projectDTO.getName() == null || projectDTO.getDescription() == null
                 || projectDTO.getAssignees() == null || projectDTO.getAssignees().size() == 0) {
             return true;
         }
@@ -80,6 +82,7 @@ public class ProjectService {
     }
 
     public List<Project> getProjects() {
+
         List<Project> projects = projectRepository.findAll();
 
         if (projects == null || projects.size() == 0) {
@@ -89,11 +92,17 @@ public class ProjectService {
         return projects;
     }
 
-    public String createAssignee(long projectId, Set<String> emails) {
+    public String createAssignee(long projectId, Set<Long> assigneesId , HttpServletRequest request) {
 
         if (validator.isValidProject(projectId)) {
 
-            Set<User> users = getAssignees(emails);
+            Project project = projectRepository.findById(projectId).get();
+            String longinUser = validator.getUserEmail(request);
+            if(!longinUser.equals(project.getCreator().getEmail())){
+                throw new UnAuthorizeException("Don't have permission to create project assignee");
+            }
+
+            Set<User> users = getAssignees(assigneesId);
 
             for (User user : users) {
                 if (!validator.isValidProjectAssignee(projectId, user.getId())) {
@@ -111,18 +120,26 @@ public class ProjectService {
         return "Successfully";
     }
 
-    public Project getProject(long id) {
+    public Project getProject(long id , HttpServletRequest request) {
         Project project = projectRepository.findById(id).get();
 
         if (project == null) {
             throw new NoSuchElementException();
         }
+        String longinUser = validator.getUserEmail(request);
+        if(!longinUser.equals(project.getCreator().getEmail())){
+            throw new UnAuthorizeException("Don't have permission to view this project"+ id);
+        }
+
 
         return project;
     }
 
-    public List<Project> getProjectsByCreatorId(String email) {
-        User user = userRepository.findByEmailIgnoreCase(email);
+    public List<Project> getProjectsByCreatorId(HttpServletRequest request) {
+
+        String longinUser = validator.getUserEmail(request);
+
+        User user = userRepository.findByEmailIgnoreCase(longinUser);
 
         List<Project> projects = projectRepository.findByCreatorId(user.getId());
 
@@ -132,8 +149,9 @@ public class ProjectService {
         return projects;
     }
 
-    public List<Project> getProjectsByAssigneeId(String email) {
-        User user = userRepository.findByEmailIgnoreCase(email);
+    public List<Project> getProjectsByAssigneeId(HttpServletRequest request) {
+        String longinUser = validator.getUserEmail(request);
+        User user = userRepository.findByEmailIgnoreCase(longinUser);
 
         List<ProjectAssignment> projectAssignments = projectAssignmentRepository.findByAssigneeId(user.getId());
 
@@ -150,12 +168,18 @@ public class ProjectService {
         return projects;
     }
 
-    public String updateProject(long id, ProjectUpdateDTO updateProject) {
+    public String updateProject(long id, ProjectUpdateDTO updateProject, HttpServletRequest request) {
 
         Project project = projectRepository.findById(id).get();
 
         if (project == null) {
             throw new InvalidInputException("Invalid project id: " + id);
+        }
+
+        String longinUser = validator.getUserEmail(request);
+
+        if(!longinUser.equals(project.getCreator().getEmail())){
+            throw new UnAuthorizeException("Don't have permission to update project");
         }
 
         if (updateProject.getName() != null && updateProject.getName().length() > 0) {
@@ -171,9 +195,17 @@ public class ProjectService {
         return "Project updated";
     }
 
-    public String deleteProject(long id) {
+    public String deleteProject(long id, HttpServletRequest request) {
 
         if (validator.isValidProject(id)) {
+
+            Project project = projectRepository.findById(id).get();
+            String longinUser = validator.getUserEmail(request);
+
+            if(!longinUser.equals(project.getCreator().getEmail())){
+                throw new UnAuthorizeException("Don't have permission to delete project" + id);
+            }
+
             projectRepository.deleteById(id);
         } else {
             throw new InvalidInputException("Project not found " + id);
@@ -184,17 +216,22 @@ public class ProjectService {
 
 
     @Transactional
-    public String deleteProjectAssignee(long id, String email) {
+    public String deleteProjectAssignee(long id, Long assigneeId, HttpServletRequest request) {
 
-        User user = userRepository.findByEmailIgnoreCase(email);
+        if (validator.isValidProjectAssignee(id, assigneeId)) {
 
-        if (user != null && validator.isValidProjectAssignee(id, user.getId())) {
-            projectAssignmentRepository.removeByProjectIdAndAssigneeId(id, user.getId());
+            Project project = projectRepository.findById(id).get();
+            String longinUser = validator.getUserEmail(request);
+            if(!longinUser.equals(project.getCreator().getEmail())){
+                throw new UnAuthorizeException("Don't have permission to delete this project assignee");
+            }
+
+            projectAssignmentRepository.removeByProjectIdAndAssigneeId(id, assigneeId);
         }else{
             throw new InvalidInputException("Invalid credentials");
         }
 
-        return "Remove assignee" + email + " from project " + id;
+        return "Remove assignee" + assigneeId + " from project " + id;
     }
 
 }
