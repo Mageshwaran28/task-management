@@ -23,7 +23,7 @@ import com.zerp.taskmanagement.validation.Validator;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserService {
 
     @Autowired
     Validator validator;
@@ -34,18 +34,8 @@ public class UserService implements UserDetailsService {
     @Autowired
     RoleRepository roleRepository;
 
-     @Autowired
+    @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User userInfo = userRepository.findByEmailIgnoreCase(username);
-        if (userInfo != null) {
-            return new UserInfoDetailsService(userInfo);
-        } else {
-            throw new UsernameNotFoundException("User not found"+username);
-        }
-    }
 
     public User addUser(UserDTO userDTO) throws IllegalAccessException, UnknownHostException {
 
@@ -87,13 +77,13 @@ public class UserService implements UserDetailsService {
         return false;
     }
 
-    public String changePassword(ChangePasswordDTO changePasswordDTO , HttpServletRequest request) {
+    public String changePassword(ChangePasswordDTO changePasswordDTO, HttpServletRequest request) {
         String email = validator.getUserEmail(request);
-       
+
         User user = userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             throw new InvalidInputException("Invalid email or password");
-        }    
+        }
         if (validator.isValidPassword(changePasswordDTO.getNewPassword())) {
             user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
         }
@@ -103,12 +93,12 @@ public class UserService implements UserDetailsService {
     }
 
     public String changeUserRole(String newRole, HttpServletRequest request) {
-       
+
         String email = validator.getUserEmail(request);
         User user = userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             throw new InvalidInputException("Invalid email");
-        }   
+        }
         if (roleRepository.existsByRole(newRole)) {
             user.setRole(roleRepository.findByRole(newRole));
         } else {

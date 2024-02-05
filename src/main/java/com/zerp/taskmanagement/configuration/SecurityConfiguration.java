@@ -16,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.zerp.taskmanagement.filter.JwtFilter;
+import com.zerp.taskmanagement.taskservice.UserInfoService;
 import com.zerp.taskmanagement.taskservice.UserService;
 
 @Configuration
@@ -26,7 +27,7 @@ public class SecurityConfiguration {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new UserService();
+        return new UserInfoService();
     }
 
     @Bean

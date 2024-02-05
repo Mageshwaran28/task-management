@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.zerp.taskmanagement.taskservice.JwtService;
-import com.zerp.taskmanagement.taskservice.UserService;
+import com.zerp.taskmanagement.taskservice.UserInfoService;
 
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.FilterChain;
@@ -21,9 +21,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private JwtService jwtService;
-    
+
     @Autowired
-    private UserService userService;
+    private UserInfoService userService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

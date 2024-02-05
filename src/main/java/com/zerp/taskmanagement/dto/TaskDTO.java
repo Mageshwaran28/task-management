@@ -62,6 +62,8 @@ public class TaskDTO {
         this.dueDate = dueDate;
     }
 
+
+
     public long getProjectId() {
         return projectId;
     }

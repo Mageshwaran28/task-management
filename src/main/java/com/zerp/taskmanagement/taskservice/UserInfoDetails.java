@@ -11,13 +11,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.zerp.taskmanagement.dbentity.User;
 
-public class UserInfoDetailsService implements UserDetails {
+public class UserInfoDetails implements UserDetails {
     
     String userName = null;
     String password = null;
     List<GrantedAuthority> authorities;
 
-    public UserInfoDetailsService(User userInfo) {
+    public UserInfoDetails(User userInfo) {
         userName = userInfo.getEmail();
         password = userInfo.getPassword();
         authorities = Arrays.stream(userInfo.getRole().getRole().split(","))
