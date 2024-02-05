@@ -9,10 +9,9 @@ import org.springframework.stereotype.Service;
 import com.zerp.taskmanagement.dbentity.User;
 import com.zerp.taskmanagement.dbrepository.UserRepository;
 
-
 @Service
 public class UserInfoService implements UserDetailsService {
-     @Autowired
+    @Autowired
     private UserRepository userInfoRepository;
 
     @Override
@@ -21,7 +20,7 @@ public class UserInfoService implements UserDetailsService {
         if (userInfo != null) {
             return new UserInfoDetailsService(userInfo);
         } else {
-            throw new UsernameNotFoundException("User not found"+username);
+            throw new UsernameNotFoundException("User not found" + username);
         }
     }
 }
