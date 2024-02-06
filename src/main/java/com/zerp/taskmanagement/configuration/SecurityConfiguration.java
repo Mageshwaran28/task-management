@@ -17,7 +17,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.zerp.taskmanagement.filter.JwtFilter;
 import com.zerp.taskmanagement.taskservice.UserInfoService;
-import com.zerp.taskmanagement.taskservice.UserService;
 
 @Configuration
 public class SecurityConfiguration {

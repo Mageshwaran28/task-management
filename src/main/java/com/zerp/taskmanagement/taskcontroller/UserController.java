@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,6 +49,8 @@ public class UserController {
     public String login(@RequestBody LoginDTO authRequest) throws UnknownHostException {
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
+        System.out.println(authenticate);
+       System.out.println(SecurityContextHolder.getContext().getAuthentication().toString());
         if (authenticate.isAuthenticated()) {
             return jwtService.generateToken(authRequest.getEmail());
         } else {
@@ -57,18 +60,19 @@ public class UserController {
 
     @PutMapping("users/change-password")
     public String changePassword(@RequestBody ChangePasswordDTO changePasswordD, HttpServletRequest request) {
-        
+
         Authentication authenticate = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(validator.getUserEmail(request), changePasswordD.getCurrentPassword()));
+                new UsernamePasswordAuthenticationToken(validator.getUserEmail(request),
+                        changePasswordD.getCurrentPassword()));
         if (authenticate.isAuthenticated()) {
             return userService.changePassword(changePasswordD, request);
         }
         throw new UnAuthorizeException("Don't have permission to change your password , Invalid credentials");
-       
+
     }
 
     @PutMapping("users")
-    public String changeUserRole( @RequestBody UpdateUserDTO user, HttpServletRequest request) {
+    public String changeUserRole(@RequestBody UpdateUserDTO user, HttpServletRequest request) {
         return userService.changeUserRole(user.getRole(), request);
     }
 
