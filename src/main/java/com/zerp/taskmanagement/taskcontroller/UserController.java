@@ -49,10 +49,10 @@ public class UserController {
     public String login(@RequestBody LoginDTO authRequest) throws UnknownHostException {
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
-        System.out.println(authenticate);
-       System.out.println(SecurityContextHolder.getContext().getAuthentication().toString());
         if (authenticate.isAuthenticated()) {
-            return jwtService.generateToken(authRequest.getEmail());
+            SecurityContextHolder.getContext().setAuthentication(authenticate);
+            System.out.println(SecurityContextHolder.getContext().getAuthentication());
+                return jwtService.generateToken(authRequest.getEmail());
         } else {
             throw new InvalidInputException("Invalid login");
         }

@@ -128,7 +128,7 @@ select * from project_assignments;
 
 desc tasks;
 select * from tasks;
-delete from tasks where id = 2;
+delete from tasks where id = 1;
 
 desc task_assignments;
 select * from task_assignments;
