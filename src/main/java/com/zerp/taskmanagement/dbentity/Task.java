@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.zerp.taskmanagement.myenum.Priority;
 import com.zerp.taskmanagement.myenum.Status;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -68,10 +67,7 @@ public class Task {
                     @JoinColumn(name = "assignee_id", referencedColumnName = "id") })
     private Set<User> assignees;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinTable(name = "project_task_assignments", joinColumns = {
-            @JoinColumn(name = "task_id", referencedColumnName = "id") }, inverseJoinColumns = {
-                    @JoinColumn(name = "project_id", referencedColumnName = "id") })
+    @ManyToOne
     Project project;
 
     public long getId() {

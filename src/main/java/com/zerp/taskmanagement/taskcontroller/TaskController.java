@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,7 +40,6 @@ public class TaskController {
     }
 
     @GetMapping("/tasks")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public List<Task> getTasks() {
         return taskService.getTasks();
     }
@@ -73,14 +71,12 @@ public class TaskController {
     }
 
     @GetMapping("/tasks/priority/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public List<Task> getTasksByPriority(@PathVariable String id) {
         Priority priority = Priority.fromString(id);
         return taskService.getTasksByPriority(priority);
     }
 
     @GetMapping("/tasks/status/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public List<Task> getTasksByStatus(@PathVariable String id) {
         Status status = Status.fromString(id);
         return taskService.getTasksByStatus(status);
@@ -97,7 +93,6 @@ public class TaskController {
     }
 
     @GetMapping("tasks/due")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public List<Task> getTasksByDueDate() {
         return taskService.getTasksByDueDate();
     }

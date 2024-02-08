@@ -18,10 +18,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
-
 @Component
 public class JwtService {
-    
+
     @Autowired
     UserRepository userInfoRepository;
 
@@ -30,10 +29,10 @@ public class JwtService {
     public String generateToken(String userName) throws UnknownHostException {
         InetAddress address = InetAddress.getLocalHost();
         String ipAddress = address.getHostAddress();
-        
+
         String registeredAddress = userInfoRepository.findByEmailIgnoreCase(userName).getIpAddress();
 
-        if(!registeredAddress.equals(ipAddress)){
+        if (!registeredAddress.equals(ipAddress)) {
             throw new UnknownHostException("Invalid IP address");
         }
 
@@ -41,7 +40,7 @@ public class JwtService {
                 .claim("address", ipAddress)
                 .setSubject(userName)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
 
@@ -77,14 +76,14 @@ public class JwtService {
 
     public Boolean validateToken(String token, UserDetails userDetails) throws UnknownHostException {
         final String userName = extractUserName(token);
-        
+
         Claims claims = extractAllClaims(token);
-        String loginedAddress = claims.get("address" , String.class );
+        String loginedAddress = claims.get("address", String.class);
 
         InetAddress address = InetAddress.getLocalHost();
         String localAddress = address.getHostAddress();
 
-        if(!localAddress.equals(loginedAddress)){
+        if (!localAddress.equals(loginedAddress)) {
             throw new UnknownHostException("Invalid Ip address");
         }
 

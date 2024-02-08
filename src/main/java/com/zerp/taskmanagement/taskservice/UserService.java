@@ -15,6 +15,7 @@ import com.zerp.taskmanagement.dbrepository.RoleRepository;
 import com.zerp.taskmanagement.dbrepository.UserRepository;
 import com.zerp.taskmanagement.dto.ChangePasswordDTO;
 import com.zerp.taskmanagement.dto.UserDTO;
+import com.zerp.taskmanagement.filter.TokenBlockList;
 import com.zerp.taskmanagement.validation.Validator;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +30,9 @@ public class UserService {
     UserRepository userRepository;
 
     @Autowired
+    TokenBlockList tokenBlockList;
+
+    @Autowired
     RoleRepository roleRepository;
 
     @Autowired
@@ -36,18 +40,15 @@ public class UserService {
 
     public User addUser(UserDTO userDTO) throws IllegalAccessException, UnknownHostException {
 
-        if (isFieldsAreEmpty(userDTO)) {
-            throw new InvalidInputException("Input fields are empty");
-        }
+        isFieldsAreEmpty(userDTO);
+        validator.isValidEmail(userDTO.getEmail());
+        validator.isValidPassword(userDTO.getPassword());
         if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new DuplicateInputException();
         }
         User user = new User();
         user.setEmail(userDTO.getEmail());
-        if (validator.isValidPassword(userDTO.getPassword())) {
-            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        }
-
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         Role role = roleRepository.findByRole(userDTO.getRole());
 
         if (role == null) {
@@ -66,11 +67,9 @@ public class UserService {
     }
 
     private boolean isFieldsAreEmpty(UserDTO userDTO) {
-
         if (userDTO.getEmail() == null || userDTO.getPassword() == null || userDTO.getRole() == null) {
-            return true;
+            throw new InvalidInputException("Input fields are empty");
         }
-
         return false;
     }
 
@@ -86,6 +85,7 @@ public class UserService {
         }
         userRepository.save(user);
 
+        tokenBlockList.invalidateToken(validator.getToken(request));
         return "Passord changed";
     }
 

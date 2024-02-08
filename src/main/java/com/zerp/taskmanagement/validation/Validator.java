@@ -50,39 +50,37 @@ public class Validator {
     @Autowired
     ProjectAssignmentRepository projectAssignmentRepository;
 
-    @Autowired 
+    @Autowired
     JwtService jwtService;
 
     public boolean isValidUser(Long id) {
-        if(userRepository.existsById(id)){
+        if (userRepository.existsById(id)) {
             return true;
-        }
-        else{
+        } else {
             throw new InvalidInputException("Invalid user id : " + id);
         }
     }
 
     public boolean isValidProject(long projectId) {
-        if(projectRepository.existsById(projectId)){
+        if (projectRepository.existsById(projectId)) {
             return true;
-        }
-        else{
+        } else {
             throw new InvalidInputException("Invalid project id : " + projectId);
         }
     }
 
     public boolean isValidTask(long taskId) {
-        if(taskRepository.existsById(taskId)){
+        if (taskRepository.existsById(taskId)) {
             return true;
-        }else{
+        } else {
             throw new InvalidInputException("Invalid task id : " + taskId);
         }
     }
 
     public boolean isValidFile(long id) {
-        if(fileRepository.existsById(id)){
+        if (fileRepository.existsById(id)) {
             return true;
-        }else{
+        } else {
             throw new InvalidInputException("Invalid file id : " + id);
         }
     }
@@ -126,7 +124,7 @@ public class Validator {
             return true;
         } else {
             throw new InvalidInputException(
-                    "Password must be strong, it contains \natleast one lowercase character \nnatleast one  uppercase character \nnatleast one digit \nnatleast one super character ");
+                    "Password must be strong, it contains \natleast one lowercase character \natleast one uppercase character \natleast one digit \natleast one super character \ntotally min 6 and max 16 characters");
         }
     }
 
@@ -137,29 +135,28 @@ public class Validator {
             throw new InvalidInputException("More than two levels of subtasks are not allowed.");
         }
 
-        if (parentTask.getProject().getId() == projectId) {
-            return true;
-        } else {
+        if (parentTask.getProject().getId() != projectId) {
             throw new InvalidInputException("The project id is must be same in both parent and child tasks.");
         }
+
+        return true;
     }
 
-    public String getUserEmail(HttpServletRequest request){
+    public String getUserEmail(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
-        String token = null;
-        String userName = null;
-        if (authHeader != null && authHeader.startsWith("Bearer")) {
-            token = authHeader.substring(7);
-            userName = jwtService.extractUserName(token);
-        }
-
+        String token = authHeader.substring(7);
+        String userName = jwtService.extractUserName(token);
         return userName;
+    }
+
+    public String getToken(HttpServletRequest request){
+        return request.getHeader("Authorization").substring(7);
     }
 
     public boolean isExistAssignee(Task task, String loginUser) {
         Set<User> assignees = task.getAssignees();
         for (User user : assignees) {
-            if(loginUser.equals(user.getEmail())){
+            if (loginUser.equals(user.getEmail())) {
                 return true;
             }
         }

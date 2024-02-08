@@ -25,6 +25,9 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private UserInfoService userInfoService;
 
+    @Autowired
+    private TokenBlockList tokenBlockList;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException, java.io.IOException {
@@ -37,9 +40,10 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userInfoService.loadUserByUsername(userName);
-            if (jwtService.validateToken(token, userDetails)) {
+            if ( !tokenBlockList.isBlackListed(token) && jwtService.validateToken(token, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
                         userDetails.getPassword(), userDetails.getAuthorities());
+    
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }

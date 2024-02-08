@@ -40,15 +40,15 @@ public class ProjectService {
     @Autowired
     ProjectAssignmentRepository projectAssignmentRepository;
 
-    public Project createProject(ProjectDTO projectDTO,HttpServletRequest request) {
-        if (isFieldsAreEmpty(projectDTO)) {
-            throw new EmptyInputException();
-        }
+    public Project createProject(ProjectDTO projectDTO, HttpServletRequest request) {
+        isFieldsAreEmpty(projectDTO);
 
         Project project = new Project();
         project.setName(projectDTO.getName());
         project.setDescription(projectDTO.getDescription());
-
+        System.out.println();
+        System.out.println(projectDTO.getDescription());
+        System.out.println();
         project.setCreator(getCreator(validator.getUserEmail(request)));
         project.setAssignees(getAssignees(projectDTO.getAssignees()));
         projectRepository.save(project);
@@ -56,7 +56,7 @@ public class ProjectService {
 
     }
 
-    public User getCreator(String creatorEmail){
+    public User getCreator(String creatorEmail) {
         return userRepository.findByEmailIgnoreCase(creatorEmail);
     }
 
@@ -67,7 +67,6 @@ public class ProjectService {
             validator.isValidUser(id);
             assignees.add(userRepository.findById(id).get());
         }
-
         return assignees;
     }
 
@@ -75,7 +74,7 @@ public class ProjectService {
 
         if (projectDTO.getName() == null || projectDTO.getDescription() == null
                 || projectDTO.getAssignees() == null || projectDTO.getAssignees().size() == 0) {
-            return true;
+            throw new EmptyInputException();
         }
 
         return false;
@@ -92,13 +91,13 @@ public class ProjectService {
         return projects;
     }
 
-    public String createAssignee(long projectId, Set<Long> assigneesId , HttpServletRequest request) {
+    public String createAssignee(long projectId, Set<Long> assigneesId, HttpServletRequest request) {
 
         if (validator.isValidProject(projectId)) {
 
             Project project = projectRepository.findById(projectId).get();
             String longinUser = validator.getUserEmail(request);
-            if(!longinUser.equals(project.getCreator().getEmail())){
+            if (!longinUser.equals(project.getCreator().getEmail())) {
                 throw new UnAuthorizeException("Don't have permission to create project assignee");
             }
 
@@ -120,17 +119,16 @@ public class ProjectService {
         return "Successfully";
     }
 
-    public Project getProject(long id , HttpServletRequest request) {
+    public Project getProject(long id, HttpServletRequest request) {
         Project project = projectRepository.findById(id).get();
 
         if (project == null) {
             throw new NoSuchElementException();
         }
         String longinUser = validator.getUserEmail(request);
-        if(!longinUser.equals(project.getCreator().getEmail())){
-            throw new UnAuthorizeException("Don't have permission to view this project"+ id);
+        if (!longinUser.equals(project.getCreator().getEmail())) {
+            throw new UnAuthorizeException("Don't have permission to view this project" + id);
         }
-
 
         return project;
     }
@@ -178,7 +176,7 @@ public class ProjectService {
 
         String longinUser = validator.getUserEmail(request);
 
-        if(!longinUser.equals(project.getCreator().getEmail())){
+        if (!longinUser.equals(project.getCreator().getEmail())) {
             throw new UnAuthorizeException("Don't have permission to update project");
         }
 
@@ -202,7 +200,7 @@ public class ProjectService {
             Project project = projectRepository.findById(id).get();
             String longinUser = validator.getUserEmail(request);
 
-            if(!longinUser.equals(project.getCreator().getEmail())){
+            if (!longinUser.equals(project.getCreator().getEmail())) {
                 throw new UnAuthorizeException("Don't have permission to delete project" + id);
             }
 
@@ -214,7 +212,6 @@ public class ProjectService {
         return "Project " + id + " has been deleted";
     }
 
-
     @Transactional
     public String deleteProjectAssignee(long id, Long assigneeId, HttpServletRequest request) {
 
@@ -222,12 +219,12 @@ public class ProjectService {
 
             Project project = projectRepository.findById(id).get();
             String longinUser = validator.getUserEmail(request);
-            if(!longinUser.equals(project.getCreator().getEmail())){
+            if (!longinUser.equals(project.getCreator().getEmail())) {
                 throw new UnAuthorizeException("Don't have permission to delete this project assignee");
             }
 
             projectAssignmentRepository.removeByProjectIdAndAssigneeId(id, assigneeId);
-        }else{
+        } else {
             throw new InvalidInputException("Invalid credentials");
         }
 
