@@ -24,7 +24,7 @@ import com.zerp.taskmanagement.taskservice.UserInfoService;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    private final String[] adminRequestmatchers = {
+    private final String[] adminRequestMatchers = {
             "/projects",
             "/tasks",
             "/tasks/priority/{id}",
@@ -50,7 +50,7 @@ public class SecurityConfiguration {
         return httpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(publicRequest).permitAll()
-                        .requestMatchers(HttpMethod.GET,adminRequestmatchers).hasAnyAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET,adminRequestMatchers).hasAnyAuthority("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
