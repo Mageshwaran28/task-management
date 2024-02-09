@@ -8,6 +8,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.zerp.taskmanagement.customexception.InvalidInputException;
 import com.zerp.taskmanagement.taskservice.JwtService;
 import com.zerp.taskmanagement.taskservice.UserInfoService;
 
@@ -46,6 +47,8 @@ public class JwtFilter extends OncePerRequestFilter {
     
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+            }else{
+                throw new InvalidInputException("Invalid token");
             }
         }
         filterChain.doFilter(request, response);
