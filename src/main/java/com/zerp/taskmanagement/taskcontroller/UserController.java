@@ -29,32 +29,37 @@ import jakarta.servlet.http.HttpServletRequest;
 public class UserController {
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    Validator validator;
+    private Validator validator;
 
     @Autowired
     private JwtService jwtService;
 
-    @PostMapping("/register")
-    public User register(@RequestBody UserDTO userDTO) throws IllegalAccessException, UnknownHostException {
-        return userService.addUser(userDTO);
+    @PostMapping("/signup")
+    public User signin(@RequestBody UserDTO userDTO, HttpServletRequest request) throws IllegalAccessException, UnknownHostException {
+        return userService.signin(userDTO,request);
     }
 
-    @PostMapping("/login")
-    public String login(@RequestBody LoginDTO authRequest) throws UnknownHostException {
+    @PostMapping("/signin")
+    public String signup(@RequestBody LoginDTO authRequest, HttpServletRequest request) throws UnknownHostException {
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
         if (authenticate.isAuthenticated()) {
             SecurityContextHolder.getContext().setAuthentication(authenticate);
-                return jwtService.generateToken(authRequest.getEmail());
+            return jwtService.generateToken(authRequest.getEmail(), request);
         } else {
             throw new InvalidInputException("Invalid login");
         }
+    }
+
+    @PostMapping("/signout")
+    public String signout(HttpServletRequest request){
+        return userService.signout(request);
     }
 
     @PutMapping("users/change-password")

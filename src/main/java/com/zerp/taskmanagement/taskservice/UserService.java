@@ -1,6 +1,5 @@
 package com.zerp.taskmanagement.taskservice;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,8 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public User addUser(UserDTO userDTO) throws IllegalAccessException, UnknownHostException {
+    public User signin(UserDTO userDTO, HttpServletRequest request)
+            throws IllegalAccessException, UnknownHostException {
 
         isFieldsAreEmpty(userDTO);
         validator.isValidEmail(userDTO.getEmail());
@@ -57,13 +57,17 @@ public class UserService {
             roleRepository.save(role);
         }
         user.setRole(role);
-
-        InetAddress address = InetAddress.getLocalHost();
-        user.setIpAddress(address.getHostAddress());
-
+        user.setIpAddress(request.getRemoteAddr());
         userRepository.save(user);
 
         return user;
+    }
+
+    public String signout(HttpServletRequest request) {
+        String token = validator.getToken(request);
+        tokenBlockList.invalidateToken(token);
+
+        return "User logged out";
     }
 
     private boolean isFieldsAreEmpty(UserDTO userDTO) {

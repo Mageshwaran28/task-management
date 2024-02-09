@@ -3,6 +3,7 @@ package com.zerp.taskmanagement.configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -23,8 +24,18 @@ import com.zerp.taskmanagement.taskservice.UserInfoService;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    private final String[] adminRequestmatchers = { "/projects", "/tasks", "/tasks/priority/{id}", "/tasks/status/{id}",
-            "/tasks/due" };
+    private final String[] adminRequestmatchers = {
+            "/projects",
+            "/tasks",
+            "/tasks/priority/{id}",
+            "/tasks/status/{id}",
+            "/tasks/due"
+    };
+
+    private final String[] publicRequest = {
+            "/signin",
+            "/signup"
+    };
 
     @Autowired
     private JwtFilter jwtFilter;
@@ -38,9 +49,8 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login")
-                        .permitAll()
-                        .requestMatchers(adminRequestmatchers).hasAnyAuthority("ADMIN")
+                        .requestMatchers(publicRequest).permitAll()
+                        .requestMatchers(HttpMethod.GET,adminRequestmatchers).hasAnyAuthority("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

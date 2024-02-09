@@ -40,7 +40,7 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userInfoService.loadUserByUsername(userName);
-            if ( !tokenBlockList.isBlackListed(token) && jwtService.validateToken(token, userDetails)) {
+            if ( !tokenBlockList.isBlackListed(token) && jwtService.validateToken(token, userDetails,request)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
                         userDetails.getPassword(), userDetails.getAuthorities());
     
@@ -50,4 +50,5 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
 }

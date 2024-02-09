@@ -17,7 +17,7 @@ create table users (
     email varchar(320) unique not null,
     role_id bigint not null,
     password varchar(70),
-    ip_address varchar(15),
+    ip_address varchar(39),
     constraint users_fk_role_id
     foreign key(role_id) references roles(id)
 );

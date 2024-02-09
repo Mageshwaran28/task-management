@@ -1,10 +1,8 @@
 package com.zerp.taskmanagement.taskservice;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.Key;
 import java.util.Date;
-import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +15,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Component
 public class JwtService {
@@ -24,24 +23,24 @@ public class JwtService {
     @Autowired
     UserRepository userInfoRepository;
 
-    private static final String SECERET = "!@#$FDGSDFGSGSGSGSHSHSHSSHGFFDSGSFGSSGHSDFSDFSFSFSFSDFSFSFSF";
+    private static final String SECERET = "!dsuDFkmGhHyfdDfKiUgJjGuDhKgFfYuJ6rf5fF66D8rDoKdFDe";
+    private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24;
 
-    public String generateToken(String userName) throws UnknownHostException {
-        InetAddress address = InetAddress.getLocalHost();
-        String ipAddress = address.getHostAddress();
-
+    public String generateToken(String userName , HttpServletRequest request) throws UnknownHostException {
+        String ipAddress = request.getRemoteAddr();
         String registeredAddress = userInfoRepository.findByEmailIgnoreCase(userName).getIpAddress();
 
         if (!registeredAddress.equals(ipAddress)) {
             throw new UnknownHostException("Invalid IP address");
         }
-
+        long now = System.currentTimeMillis();
         return Jwts.builder()
                 .claim("address", ipAddress)
                 .setSubject(userName)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+                .setIssuedAt(new Date(now))
+                .setExpiration(new Date(now + EXPIRATION_TIME))
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     private Key getSignKey() {
@@ -50,16 +49,11 @@ public class JwtService {
     }
 
     public String extractUserName(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return extractAllClaims(token).getSubject();
     }
 
     public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
-
-    private <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimResolver.apply(claims);
+        return extractAllClaims(token).getExpiration();
     }
 
     private Claims extractAllClaims(String token) {
@@ -74,14 +68,12 @@ public class JwtService {
         return extractExpiration(token).before(new Date());
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) throws UnknownHostException {
+    public Boolean validateToken(String token, UserDetails userDetails, HttpServletRequest request) throws UnknownHostException {
         final String userName = extractUserName(token);
 
         Claims claims = extractAllClaims(token);
         String loginedAddress = claims.get("address", String.class);
-
-        InetAddress address = InetAddress.getLocalHost();
-        String localAddress = address.getHostAddress();
+        String localAddress = request.getRemoteAddr();
 
         if (!localAddress.equals(loginedAddress)) {
             throw new UnknownHostException("Invalid Ip address");

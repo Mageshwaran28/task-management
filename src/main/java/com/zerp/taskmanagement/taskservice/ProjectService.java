@@ -46,9 +46,6 @@ public class ProjectService {
         Project project = new Project();
         project.setName(projectDTO.getName());
         project.setDescription(projectDTO.getDescription());
-        System.out.println();
-        System.out.println(projectDTO.getDescription());
-        System.out.println();
         project.setCreator(getCreator(validator.getUserEmail(request)));
         project.setAssignees(getAssignees(projectDTO.getAssignees()));
         projectRepository.save(project);
