@@ -27,6 +27,7 @@ public class JwtService {
     private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24;
 
     public String generateToken(String userName , HttpServletRequest request) throws UnknownHostException {
+        System.out.println(getSignKey().toString());
         String ipAddress = request.getRemoteAddr();
         String registeredAddress = userInfoRepository.findByEmailIgnoreCase(userName).getIpAddress();
 

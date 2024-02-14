@@ -1,18 +1,18 @@
 Email & password & role
 
 karthikeyan@zirius.in
-Karthikeyan@123
+Karthi@123
 ASSOSIATE_PRODECT_LEAD
 
-bharathrajrb20it@gmail.com
-Bharathrajrb@123
+bharathrajrb20it@zirius.in
+Bharath@123
 INTERN
 
-davidjrmeshach@gmail.com
+davidjrmeshach@zirius.in
 David@123
 INTERN
 
-prasannaharrish@gmail.com
+prasannaharrish@zirius.in
 Harrish@123
 INTERN
 
@@ -20,44 +20,44 @@ harsha@zirius.in
 Harsha@123
 HUMAN_RESOURCE
 
-kiruthikajaga2003@gmail.com
-Kiruthikajaga2003@123
+kiruthikajaga2003@zirius.in
+Kiruthika@123
 INTERN
 
-mageshwaranbalaji25@gmail.com
-Mageshwaranbalaji25@123
+mageshwaranbalaji25@zirius.in
+Magesh@123
 INTERN
 
-rajasaravananmcsea@gmail.com
-Rajasaravananmcsea@123
+rajasaravananmcsea@zirius.in
+Raj@123
 INTERN
 
-pauldeepak2003@gmail.com
-Pauldeepak2003@123
+pauldeepak2003@zirius.in
+Paul@123
 INTERN
 
-sabarikrishnanmpl2024@gmail.com
-Sabarikrishnanmpl2024@123
+sabarikrishnanmpl2024@zirius.in
+Sabari@123
 INTERN
 
-subashpalvel.ai@gmail.com
-Subashpalvel.ai@123
+subashpalvel.ai@zirius.in
+Subash@123
 INTERN
 
-Tamilselvansvt44@gmail.com
-Tamilselvansvt44@123
+Tamilselvansvt44@zirius.in
+Tamil@123
 INTERN
 
-vijayaruchamy2003@gmail.com
-vijayaruchamy2003@123
+vijayaruchamy2003@zirius.in
+Vijay@123
 INTERN
 
 vignesh.t@zirius.in
-Vignesh.t@123
+Vignesh@123
 FRONT_END_DEVELOPER
 
 sharoonpaul@zirius.in
-Sharoonpaul@123
+Paul@123
 BACK_END_DEVELOPER
 
 riyan@zirius.in
@@ -65,7 +65,7 @@ Riyan@123
 FRONT_END_DEVELOPER
 
 elanchezhiyan@zirius.in
-Elanchezhiyan@123
+Elan@123
 BACK_END_DEVELOPER
 
 
