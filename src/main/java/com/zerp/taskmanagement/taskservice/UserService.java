@@ -37,7 +37,7 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public User signin(UserDTO userDTO, HttpServletRequest request)
+    public User signup(UserDTO userDTO, HttpServletRequest request)
             throws IllegalAccessException, UnknownHostException {
 
         isFieldsAreEmpty(userDTO);
@@ -111,6 +111,10 @@ public class UserService {
         userRepository.save(user);
 
         return "Role updated";
+    }
+
+    public String getUserName(HttpServletRequest request) {
+        return validator.getUserEmail(request);
     }
 
 }

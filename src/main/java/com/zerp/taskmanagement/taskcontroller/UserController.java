@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,12 +42,14 @@ public class UserController {
     private JwtService jwtService;
 
     @PostMapping("/signup")
-    public User signin(@RequestBody UserDTO userDTO, HttpServletRequest request) throws IllegalAccessException, UnknownHostException {
-        return userService.signin(userDTO,request);
+    public User signup(@RequestBody UserDTO userDTO, HttpServletRequest request) throws IllegalAccessException, UnknownHostException {
+        System.out.println("Register user");
+        System.out.println(userDTO.getEmail());
+        return userService.signup(userDTO,request);
     }
 
     @PostMapping("/signin")
-    public String signup(@RequestBody LoginDTO authRequest, HttpServletRequest request) throws UnknownHostException {
+    public String signin(@RequestBody LoginDTO authRequest, HttpServletRequest request) throws UnknownHostException {
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
         if (authenticate.isAuthenticated()) {
@@ -78,6 +81,11 @@ public class UserController {
     @PutMapping("users")
     public String changeUserRole(@RequestBody UpdateUserDTO user, HttpServletRequest request) {
         return userService.changeUserRole(user.getRole(), request);
+    }
+
+    @GetMapping("/users")
+    public String getUserName(HttpServletRequest request) {
+        return userService.getUserName(request);
     }
 
 }
