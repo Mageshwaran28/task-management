@@ -50,7 +50,7 @@ public class MyControllerAdvice {
 
     @ExceptionHandler(UnAuthorizeException.class)
     public ResponseEntity<String> handleUnAuthorizeException(UnAuthorizeException exception){
-        return new ResponseEntity<String>(exception.getErrorMessage(),HttpStatus.FORBIDDEN);
+        return new ResponseEntity<String>(exception.getErrorMessage(),HttpStatus.UNAUTHORIZED);
     }
 
 }
