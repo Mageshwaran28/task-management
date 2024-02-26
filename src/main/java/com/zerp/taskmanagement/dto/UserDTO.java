@@ -6,10 +6,6 @@ public class UserDTO {
     String role;
     String password;
 
-    public UserDTO(){
-
-    }
-
     public String getEmail() {
         return email;
     }
@@ -23,7 +19,7 @@ public class UserDTO {
     }
 
     public void setRole(String role) {
-        this.role = role;
+        this.role = role.toUpperCase();
     }
 
     public String getPassword() {

@@ -39,9 +39,9 @@ public class UserService extends CommonUtils {
         isFieldsAreEmpty(userDTO);
         isValidEmail(userDTO.getEmail());
         isValidPassword(userDTO.getPassword());
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
+        if (userRepository.existsByEmail(userDTO.getEmail()) ) {
             throw new DuplicateInputException();
-        }else if(userDTO.getRole().equals("admin")){
+        }else if(!userDTO.getEmail().equals("admin@zirius.in") && userDTO.getRole().equals("ADMIN")){
             throw new InvalidInputException("Invalid role for user " + userDTO.getRole());
         }
         User user = new User();
@@ -51,7 +51,7 @@ public class UserService extends CommonUtils {
 
         if (role == null) {
             role = new Role();
-            role.setRole(userDTO.getRole().toUpperCase());
+            role.setRole(userDTO.getRole());
             roleRepository.save(role);
         }
         user.setRole(role);

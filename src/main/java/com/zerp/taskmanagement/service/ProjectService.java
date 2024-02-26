@@ -14,7 +14,6 @@ import com.zerp.taskmanagement.dto.ProjectDTO;
 import com.zerp.taskmanagement.dto.ProjectUpdateDTO;
 import com.zerp.taskmanagement.exceptions.EmptyInputException;
 import com.zerp.taskmanagement.exceptions.InvalidInputException;
-import com.zerp.taskmanagement.exceptions.UnAuthorizeException;
 import com.zerp.taskmanagement.model.Project;
 import com.zerp.taskmanagement.model.ProjectAssignment;
 import com.zerp.taskmanagement.model.User;
@@ -106,18 +105,8 @@ public class ProjectService extends CommonUtils {
         return "Successfully";
     }
 
-    public Project getProject(long id, HttpServletRequest request) {
-        Project project = projectRepository.findById(id).get();
-
-        if (project == null) {
-            throw new NoSuchElementException();
-        }
-        String longinUser = getUserEmail(request);
-        if (!longinUser.equals(project.getCreator().getEmail())) {
-            throw new UnAuthorizeException("Don't have permission to view this project" + id);
-        }
-
-        return project;
+    public Project getProject(long id) {
+        return projectRepository.findById(id).get();
     }
 
     public List<Project> getProjectsByCreatorId(String loginUser) {

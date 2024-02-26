@@ -54,7 +54,7 @@ public class ProjectController extends CommonUtils {
     public Project getProject(@PathVariable long id, HttpServletRequest request) {
         String loginUser = getUserEmail(request);
         if (isAdminOrProjectCreator(id, loginUser) || isValidProjectAssignee(id, loginUser)) {
-            return projectService.getProject(id, request);
+            return projectService.getProject(id);
         }
         throw new UnAuthorizeException("Don't have permission to create project assignee");
     }
