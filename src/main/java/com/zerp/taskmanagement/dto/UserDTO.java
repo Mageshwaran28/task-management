@@ -6,6 +6,10 @@ public class UserDTO {
     String role;
     String password;
 
+    public UserDTO(){
+
+    }
+
     public String getEmail() {
         return email;
     }

@@ -8,9 +8,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.zerp.taskmanagement.customexception.InvalidInputException;
-import com.zerp.taskmanagement.taskservice.JwtService;
-import com.zerp.taskmanagement.taskservice.UserInfoService;
+import com.zerp.taskmanagement.exceptions.InvalidInputException;
+import com.zerp.taskmanagement.service.JwtService;
+import com.zerp.taskmanagement.service.UserInfoService;
 
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.FilterChain;

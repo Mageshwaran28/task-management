@@ -1,25 +1,21 @@
 package com.zerp.taskmanagement.validation;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.zerp.taskmanagement.customexception.InvalidInputException;
-import com.zerp.taskmanagement.dbentity.Task;
-import com.zerp.taskmanagement.dbentity.User;
-import com.zerp.taskmanagement.dbrepository.FileRepository;
-import com.zerp.taskmanagement.dbrepository.ProjectAssignmentRepository;
-import com.zerp.taskmanagement.dbrepository.ProjectRepository;
-import com.zerp.taskmanagement.dbrepository.TaskAssignmentRepository;
-import com.zerp.taskmanagement.dbrepository.TaskRepository;
-import com.zerp.taskmanagement.dbrepository.UserRepository;
-import com.zerp.taskmanagement.taskservice.JwtService;
-
-import jakarta.servlet.http.HttpServletRequest;
+import com.zerp.taskmanagement.exceptions.InvalidInputException;
+import com.zerp.taskmanagement.model.Task;
+import com.zerp.taskmanagement.repository.FileRepository;
+import com.zerp.taskmanagement.repository.ProjectAssignmentRepository;
+import com.zerp.taskmanagement.repository.ProjectRepository;
+import com.zerp.taskmanagement.repository.TaskAssignmentRepository;
+import com.zerp.taskmanagement.repository.TaskRepository;
+import com.zerp.taskmanagement.repository.UserRepository;
+import com.zerp.taskmanagement.service.JwtService;
 
 @Component
 public class Validator {
@@ -103,6 +99,7 @@ public class Validator {
 
     public boolean isValidEmail(String email) {
         Matcher matcher = pattern.matcher(email);
+
         if (matcher.matches()) {
             return true;
         } else {
@@ -110,12 +107,14 @@ public class Validator {
         }
     }
 
-    public boolean isValidProjectAssignee(long id, long assignee) {
-        return projectAssignmentRepository.existsByProjectIdAndAssigneeId(id, assignee);
+    public boolean isValidProjectAssignee(long id, String username) {
+        long assigneeId = userRepository.findByEmailIgnoreCase(username).getId();
+        return projectAssignmentRepository.existsByProjectIdAndAssigneeId(id, assigneeId);
     }
 
-    public boolean isValidTaskAssignee(long id, long assignee) {
-        return taskAssignmentRepository.existsByTaskIdAndAssigneeId(id, assignee);
+    public boolean isValidTaskAssignee(long id, String username) {
+        long assigneeId = userRepository.findByEmailIgnoreCase(username).getId();
+        return taskAssignmentRepository.existsByTaskIdAndAssigneeId(id, assigneeId);
     }
 
     public boolean isValidPassword(String password) {
@@ -142,25 +141,28 @@ public class Validator {
         return true;
     }
 
-    public String getUserEmail(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        String userName = jwtService.extractUserName(token);
-        return userName;
+    public boolean isAdmin(String username) {
+        return username.equals("admin@zirius.in") ? true : false;
     }
 
-    public String getToken(HttpServletRequest request){
-        return request.getHeader("Authorization").substring(7);
-    }
-
-    public boolean isExistAssignee(Task task, String loginUser) {
-        Set<User> assignees = task.getAssignees();
-        for (User user : assignees) {
-            if (loginUser.equals(user.getEmail())) {
-                return true;
-            }
+    public boolean isAdminOrTaskCreator(Long id, String loginUser) {
+        isValidTask(id);
+        if (isAdmin(loginUser)) {
+            return true;
+        } else {
+            long userId = userRepository.findByEmailIgnoreCase(loginUser).getId();
+            return taskRepository.existsByIdAndCreatorId(id, userId);
         }
-        return false;
+    }
+
+    public boolean isAdminOrProjectCreator(Long id, String loginUser) {
+        isValidProject(id);
+        if (isAdmin(loginUser)) {
+            return true;
+        } else {
+            long userId = userRepository.findByEmailIgnoreCase(loginUser).getId();
+            return projectRepository.existsByIdAndCreatorId(id, userId);
+        }
     }
 
 }

@@ -17,7 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.zerp.taskmanagement.filter.JwtFilter;
-import com.zerp.taskmanagement.taskservice.UserInfoService;
+import com.zerp.taskmanagement.service.UserInfoService;
 
 @Configuration
 @EnableWebSecurity
@@ -47,7 +47,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable())              
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(publicRequest).permitAll()
                         .requestMatchers(HttpMethod.GET, adminRequestMatchers).hasAnyAuthority("ADMIN")

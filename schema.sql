@@ -104,26 +104,19 @@ create table files(
 );
 
 
-  desc roles;
+desc roles;
 select * from roles;
 desc users;
 select * from users;
 delete from users where id =4;
-update  users set ip_address = "10.1.1.146" where id = 1;
 delete from users;
 desc projects;
 select * from projects;
-
 desc project_assignments;
 select * from project_assignments;
-
 desc tasks;
 select * from tasks;
-delete from tasks where id = 1;
-
 desc task_assignments;
 select * from task_assignments;
-
 desc files;
 select * from files;
-delete from files;
