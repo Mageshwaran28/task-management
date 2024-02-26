@@ -56,7 +56,7 @@ public class ProjectController extends CommonUtils {
         if (isAdminOrProjectCreator(id, loginUser) || isValidProjectAssignee(id, loginUser)) {
             return projectService.getProject(id);
         }
-        throw new UnAuthorizeException("Don't have permission to create project assignee");
+        throw new UnAuthorizeException("Don't have permission to view this project : " + id);
     }
 
     @GetMapping("projects/creators")
