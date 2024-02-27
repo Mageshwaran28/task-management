@@ -1,7 +1,5 @@
 package com.zerp.taskmanagement.service;
 
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -20,6 +18,8 @@ import com.zerp.taskmanagement.model.User;
 import com.zerp.taskmanagement.repository.ProjectAssignmentRepository;
 import com.zerp.taskmanagement.repository.ProjectRepository;
 import com.zerp.taskmanagement.repository.UserRepository;
+import com.zerp.taskmanagement.singletonmanager.CollectionSingletonManager;
+import com.zerp.taskmanagement.singletonmanager.ModelSingletonManager;
 import com.zerp.taskmanagement.utils.CommonUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,10 +36,16 @@ public class ProjectService extends CommonUtils {
     @Autowired
     ProjectAssignmentRepository projectAssignmentRepository;
 
+    @Autowired
+    ModelSingletonManager modelSingletonManager;
+
+    @Autowired
+    CollectionSingletonManager collectionSingletonManager;
+
     public Project createProject(ProjectDTO projectDTO, String creator) {
         isFieldsAreEmpty(projectDTO);
 
-        Project project = new Project();
+        Project project = modelSingletonManager.getProjectInstance();
         project.setName(projectDTO.getName());
         project.setDescription(projectDTO.getDescription());
         project.setCreator(getCreator(creator));
@@ -47,20 +53,6 @@ public class ProjectService extends CommonUtils {
         projectRepository.save(project);
         return project;
 
-    }
-
-    public User getCreator(String creatorEmail) {
-        return userRepository.findByEmailIgnoreCase(creatorEmail);
-    }
-
-    public Set<User> getAssignees(Set<Long> assigneesId) {
-        Set<User> assignees = new HashSet<User>();
-
-        for (long id : assigneesId) {
-            isValidUser(id);
-            assignees.add(userRepository.findById(id).get());
-        }
-        return assignees;
     }
 
     private boolean isFieldsAreEmpty(ProjectDTO projectDTO) {
@@ -91,7 +83,7 @@ public class ProjectService extends CommonUtils {
 
             for (User user : users) {
                 if (!isValidProjectAssignee(projectId, user.getEmail())) {
-                    ProjectAssignment assignment = new ProjectAssignment();
+                    ProjectAssignment assignment = modelSingletonManager.getProjectAssignmentInstance();
                     assignment.setProject(projectRepository.findById(projectId).get());
                     assignment.setAssignee(user);
                     projectAssignmentRepository.save(assignment);
@@ -124,7 +116,7 @@ public class ProjectService extends CommonUtils {
         User user = userRepository.findByEmailIgnoreCase(loginUser);
 
         List<ProjectAssignment> projectAssignments = projectAssignmentRepository.findByAssigneeId(user.getId());
-        List<Project> projects = new LinkedList<Project>();
+        List<Project> projects = collectionSingletonManager.getProjectLinkedListInstance();
 
         for (ProjectAssignment projectAssignment : projectAssignments) {
             projects.add(projectAssignment.getProject());

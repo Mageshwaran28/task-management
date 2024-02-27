@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,9 +19,11 @@ import com.zerp.taskmanagement.dto.UserDTO;
 import com.zerp.taskmanagement.exceptions.InvalidInputException;
 import com.zerp.taskmanagement.model.User;
 import com.zerp.taskmanagement.service.JwtService;
+import com.zerp.taskmanagement.service.MailService;
 import com.zerp.taskmanagement.service.UserService;
 import com.zerp.taskmanagement.utils.CommonUtils;
 
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
@@ -37,9 +38,12 @@ public class UserController extends CommonUtils {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private MailService mailService;
+
     @PostMapping("/signup")
     public User signup(@RequestBody UserDTO userDTO, HttpServletRequest request)
-            throws IllegalAccessException, UnknownHostException {
+            throws IllegalAccessException, UnknownHostException, MessagingException {
         return userService.signup(userDTO, request.getRemoteAddr());
     }
 
@@ -48,7 +52,6 @@ public class UserController extends CommonUtils {
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
         if (authenticate.isAuthenticated()) {
-            SecurityContextHolder.getContext().setAuthentication(authenticate);
             return jwtService.generateToken(authRequest.getEmail(), request);
         } else {
             throw new InvalidInputException("Invalid login credentials");

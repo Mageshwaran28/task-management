@@ -2,7 +2,6 @@ package com.zerp.taskmanagement.service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -27,6 +26,8 @@ import com.zerp.taskmanagement.repository.ProjectRepository;
 import com.zerp.taskmanagement.repository.TaskAssignmentRepository;
 import com.zerp.taskmanagement.repository.TaskRepository;
 import com.zerp.taskmanagement.repository.UserRepository;
+import com.zerp.taskmanagement.singletonmanager.CollectionSingletonManager;
+import com.zerp.taskmanagement.singletonmanager.ModelSingletonManager;
 import com.zerp.taskmanagement.utils.CommonUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,10 +49,13 @@ public class TaskService extends CommonUtils {
     FileRepository fileRepository;
 
     @Autowired
-    ProjectService projectService;
+    TaskAssignmentRepository taskAssignmentRepository;
 
     @Autowired
-    TaskAssignmentRepository taskAssignmentRepository;
+    ModelSingletonManager  modelSingletonManager;
+
+    @Autowired
+    CollectionSingletonManager collectionSingletonManager;
 
     public Task createTask(TaskDTO taskDTO, String creator) {
 
@@ -59,7 +63,7 @@ public class TaskService extends CommonUtils {
         isValidDueDate(taskDTO.getDueDate());
         isValidStartDate(taskDTO.getStartDate());
 
-        Task task = new Task();
+        Task task =  modelSingletonManager.getTaskInstance();
         task.setName(taskDTO.getName());
         task.setDescription(taskDTO.getDescription());
 
@@ -68,8 +72,8 @@ public class TaskService extends CommonUtils {
         task.setCreatedAt(LocalDateTime.now());
         task.setStartDate(taskDTO.getStartDate());
         task.setDueDate(taskDTO.getDueDate());
-        task.setCreator(projectService.getCreator(creator));
-        task.setAssignees(projectService.getAssignees(taskDTO.getAssignees()));
+        task.setCreator(getCreator(creator));
+        task.setAssignees(getAssignees(taskDTO.getAssignees()));
         task.setProject(getProject(taskDTO.getProjectId()));
 
         if (taskDTO.getParentTaskId() != 0
@@ -125,24 +129,24 @@ public class TaskService extends CommonUtils {
             throw new InvalidInputException("Please choose a file to upload");
         }
 
-        File file = new File();
+        File file =  modelSingletonManager.getFileInstance();
         file.setName(uploadFile.getOriginalFilename());
         file.setType(uploadFile.getContentType());
         file.setDocument(uploadFile.getBytes());
         file.setUploadedDate(LocalDateTime.now());
         file.setTask(taskRepository.findById(id).get());
-        file.setUploadedBy(projectService.getCreator(loginUser));
+        file.setUploadedBy(getCreator(loginUser));
 
         fileRepository.save(file);
         return file;
     }
 
     public String createAssignee(long id, Set<Long> assigneesId, HttpServletRequest request) {
-        Set<User> users = projectService.getAssignees(assigneesId);
+        Set<User> users = getAssignees(assigneesId);
 
         for (User user : users) {
             if (!isValidTaskAssignee(id, user.getEmail())) {
-                TaskAssignment assignment = new TaskAssignment();
+                TaskAssignment assignment =  modelSingletonManager.getTaskAssignmentInstance();
                 assignment.setTask(taskRepository.findById(id).get());
                 assignment.setAssignee(user);
                 taskAssignmentRepository.save(assignment);
@@ -191,7 +195,7 @@ public class TaskService extends CommonUtils {
     public List<Task> getTasksByAssignee(String email) {
         User user = userRepository.findByEmailIgnoreCase(email);
         List<TaskAssignment> taskAssignments = taskAssignmentRepository.findByAssigneeId(user.getId());
-        List<Task> tasks = new LinkedList<Task>();
+        List<Task> tasks = collectionSingletonManager.getTaskLinkedListInstance();
 
         for (TaskAssignment taskAssignment : taskAssignments) {
             tasks.add(taskAssignment.getTask());

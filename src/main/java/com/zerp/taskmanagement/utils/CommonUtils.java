@@ -1,10 +1,15 @@
 package com.zerp.taskmanagement.utils;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.zerp.taskmanagement.exceptions.UnAuthorizeException;
+import com.zerp.taskmanagement.model.User;
+import com.zerp.taskmanagement.repository.UserRepository;
 import com.zerp.taskmanagement.service.JwtService;
+import com.zerp.taskmanagement.singletonmanager.CollectionSingletonManager;
 import com.zerp.taskmanagement.validation.Validator;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +19,12 @@ public class CommonUtils extends Validator {
 
     @Autowired
     JwtService jwtService;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    CollectionSingletonManager collectionSingletonManager;
 
     public String getUserEmail(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -26,8 +37,24 @@ public class CommonUtils extends Validator {
         return request.getHeader("Authorization").substring(7);
     }
 
-    public void throwUnAuthorizedException(String error){
+    public void throwUnAuthorizedException(String error) {
         throw new UnAuthorizeException(error);
     }
+
+    public User getCreator(String creatorEmail) {
+        return userRepository.findByEmailIgnoreCase(creatorEmail);
+    }
+
+    public Set<User> getAssignees(Set<Long> assigneesId) {
+        Set<User> assignees = collectionSingletonManager.getUserHashSetInstance();
+
+        for (long id : assigneesId) {
+            isValidUser(id);
+            assignees.add(userRepository.findById(id).get());
+        }
+        return assignees;
+    }
+
+    
 
 }
