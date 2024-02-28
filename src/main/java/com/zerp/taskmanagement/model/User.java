@@ -19,6 +19,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    private String name;
     private String email;
 
     @JsonIgnore
@@ -70,7 +71,13 @@ public class User {
     public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
     }
-  
-    
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }  
 
 }

@@ -5,7 +5,8 @@ import com.zerp.taskmanagement.exceptions.InvalidInputException;
 public enum Status {
     PENDING("1"),
     PROCESSING("2"),
-    COMPLETED("3");
+    HOLD("3"),
+    COMPLETED("4");
 
     private final String stringValue;
 

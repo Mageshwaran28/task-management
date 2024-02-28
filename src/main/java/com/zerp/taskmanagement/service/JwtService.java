@@ -81,6 +81,12 @@ public class JwtService {
         if (!localAddress.equals(loginedAddress)) {
             throw new UnknownHostException("Invalid Ip address");
         }
+        System.out.println();
+        System.out.println(userName);
+        System.out.println(userDetails.getUsername());
+        System.out.println(userName.equals(userDetails.getUsername()));
+        System.out.println(!isTokenExpired(token));
+        System.out.println();
 
         return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }

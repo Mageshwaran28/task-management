@@ -1,11 +1,15 @@
 package com.zerp.taskmanagement.dto;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 public class ProjectDTO {
 
     private String name;
     private String description;
+    private int status;
+    private LocalDateTime startDate;
+    private LocalDateTime dueDate;
     private Set<Long> assignees;
 
     public String getName() {
@@ -32,6 +36,29 @@ public class ProjectDTO {
         this.assignees = assignees;
     }
 
-    
+    public int getStatus() {
+        return status;
+    }
 
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDateTime getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDateTime dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    
 }

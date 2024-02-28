@@ -2,6 +2,7 @@ package com.zerp.taskmanagement.service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -26,8 +27,6 @@ import com.zerp.taskmanagement.repository.ProjectRepository;
 import com.zerp.taskmanagement.repository.TaskAssignmentRepository;
 import com.zerp.taskmanagement.repository.TaskRepository;
 import com.zerp.taskmanagement.repository.UserRepository;
-import com.zerp.taskmanagement.singletonmanager.CollectionSingletonManager;
-import com.zerp.taskmanagement.singletonmanager.ModelSingletonManager;
 import com.zerp.taskmanagement.utils.CommonUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,10 +51,7 @@ public class TaskService extends CommonUtils {
     TaskAssignmentRepository taskAssignmentRepository;
 
     @Autowired
-    ModelSingletonManager  modelSingletonManager;
-
-    @Autowired
-    CollectionSingletonManager collectionSingletonManager;
+    MailService mailService;
 
     public Task createTask(TaskDTO taskDTO, String creator) {
 
@@ -63,7 +59,7 @@ public class TaskService extends CommonUtils {
         isValidDueDate(taskDTO.getDueDate());
         isValidStartDate(taskDTO.getStartDate());
 
-        Task task =  modelSingletonManager.getTaskInstance();
+        Task task =  new Task();
         task.setName(taskDTO.getName());
         task.setDescription(taskDTO.getDescription());
 
@@ -85,12 +81,12 @@ public class TaskService extends CommonUtils {
         }
 
         taskRepository.save(task);
+
+        mailService.acknwoledgeForCreatedTask(task);
         return task;
     }
 
-    private Status getStatus(int status) {
-        return Status.fromString(Integer.toString(status));
-    }
+   
 
     private Priority getPriority(int priority) {
         return Priority.fromString(Integer.toString(priority));
@@ -129,7 +125,7 @@ public class TaskService extends CommonUtils {
             throw new InvalidInputException("Please choose a file to upload");
         }
 
-        File file =  modelSingletonManager.getFileInstance();
+        File file =  new File();
         file.setName(uploadFile.getOriginalFilename());
         file.setType(uploadFile.getContentType());
         file.setDocument(uploadFile.getBytes());
@@ -146,7 +142,7 @@ public class TaskService extends CommonUtils {
 
         for (User user : users) {
             if (!isValidTaskAssignee(id, user.getEmail())) {
-                TaskAssignment assignment =  modelSingletonManager.getTaskAssignmentInstance();
+                TaskAssignment assignment =  new TaskAssignment();
                 assignment.setTask(taskRepository.findById(id).get());
                 assignment.setAssignee(user);
                 taskAssignmentRepository.save(assignment);
@@ -195,7 +191,7 @@ public class TaskService extends CommonUtils {
     public List<Task> getTasksByAssignee(String email) {
         User user = userRepository.findByEmailIgnoreCase(email);
         List<TaskAssignment> taskAssignments = taskAssignmentRepository.findByAssigneeId(user.getId());
-        List<Task> tasks = collectionSingletonManager.getTaskLinkedListInstance();
+        List<Task> tasks = new LinkedList<Task>();
 
         for (TaskAssignment taskAssignment : taskAssignments) {
             tasks.add(taskAssignment.getTask());

@@ -1,15 +1,16 @@
 package com.zerp.taskmanagement.utils;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.zerp.taskmanagement.enums.Status;
 import com.zerp.taskmanagement.exceptions.UnAuthorizeException;
 import com.zerp.taskmanagement.model.User;
 import com.zerp.taskmanagement.repository.UserRepository;
 import com.zerp.taskmanagement.service.JwtService;
-import com.zerp.taskmanagement.singletonmanager.CollectionSingletonManager;
 import com.zerp.taskmanagement.validation.Validator;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,9 +23,6 @@ public class CommonUtils extends Validator {
 
     @Autowired
     UserRepository userRepository;
-
-    @Autowired
-    CollectionSingletonManager collectionSingletonManager;
 
     public String getUserEmail(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -46,7 +44,7 @@ public class CommonUtils extends Validator {
     }
 
     public Set<User> getAssignees(Set<Long> assigneesId) {
-        Set<User> assignees = collectionSingletonManager.getUserHashSetInstance();
+        Set<User> assignees = new HashSet<User>();
 
         for (long id : assigneesId) {
             isValidUser(id);
@@ -55,6 +53,7 @@ public class CommonUtils extends Validator {
         return assignees;
     }
 
-    
-
+    public Status getStatus(int status) {
+        return Status.fromString(Integer.toString(status));
+    }
 }

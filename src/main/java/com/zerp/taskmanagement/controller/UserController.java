@@ -19,7 +19,6 @@ import com.zerp.taskmanagement.dto.UserDTO;
 import com.zerp.taskmanagement.exceptions.InvalidInputException;
 import com.zerp.taskmanagement.model.User;
 import com.zerp.taskmanagement.service.JwtService;
-import com.zerp.taskmanagement.service.MailService;
 import com.zerp.taskmanagement.service.UserService;
 import com.zerp.taskmanagement.utils.CommonUtils;
 
@@ -37,9 +36,6 @@ public class UserController extends CommonUtils {
 
     @Autowired
     private JwtService jwtService;
-
-    @Autowired
-    private MailService mailService;
 
     @PostMapping("/signup")
     public User signup(@RequestBody UserDTO userDTO, HttpServletRequest request)

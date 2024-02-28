@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.zerp.taskmanagement.dto.ProjectDTO;
 import com.zerp.taskmanagement.dto.ProjectUpdateDTO;
+import com.zerp.taskmanagement.enums.Status;
 import com.zerp.taskmanagement.exceptions.UnAuthorizeException;
 import com.zerp.taskmanagement.model.Project;
 import com.zerp.taskmanagement.service.JwtService;
@@ -76,6 +77,17 @@ public class ProjectController extends CommonUtils {
             return projectService.updateProject(id, updateProject, request);
         }
         throw new UnAuthorizeException("Don't have permission to update project");
+    }
+
+    @PutMapping("/projects/{id}/status/{statusId}")
+    public String updateProjectStatus(@PathVariable Long id, @PathVariable String statusId, HttpServletRequest request) {
+        Status status = Status.fromString(statusId);
+        String loginUser = getUserEmail(request);
+        if (isAdminOrProjectCreator(id, loginUser) || isValidProjectAssignee(id, loginUser)) {
+            return projectService.updateProjectStatus(id, status);
+        }
+        throw new UnAuthorizeException("Don't have permission to update status of this task." + id);
+
     }
 
     @DeleteMapping("projects/{id}/assignees/{assigneeId}")

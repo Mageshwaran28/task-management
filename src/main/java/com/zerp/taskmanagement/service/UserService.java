@@ -15,7 +15,6 @@ import com.zerp.taskmanagement.model.Role;
 import com.zerp.taskmanagement.model.User;
 import com.zerp.taskmanagement.repository.RoleRepository;
 import com.zerp.taskmanagement.repository.UserRepository;
-import com.zerp.taskmanagement.singletonmanager.ModelSingletonManager;
 import com.zerp.taskmanagement.utils.CommonUtils;
 
 import jakarta.mail.MessagingException;
@@ -35,12 +34,6 @@ public class UserService extends CommonUtils {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private ModelSingletonManager modelSingletonManager;
-
-    @Autowired
-    private MailService emailService;
-
     public User signup(UserDTO userDTO, String ipAddress)
             throws IllegalAccessException, UnknownHostException, MessagingException {
 
@@ -52,21 +45,20 @@ public class UserService extends CommonUtils {
         } else if (!userDTO.getEmail().equals("admin@zirius.in") && userDTO.getRole().equals("ADMIN")) {
             throw new InvalidInputException("Invalid role for user " + userDTO.getRole());
         }
-        User user = modelSingletonManager.getUserInstance();
+        User user = new User();
+        user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         Role role = roleRepository.findByRole(userDTO.getRole());
 
         if (role == null) {
-            role = modelSingletonManager.getRoleInstance();
+            role = new Role();
             role.setRole(userDTO.getRole());
             roleRepository.save(role);
         }
         user.setRole(role);
         user.setIpAddress(ipAddress);
         userRepository.save(user);
-        emailService.sendMail( user.getEmail(), "Registration Success", "Registered successfully");
-
         return user;
     }
 
@@ -76,7 +68,8 @@ public class UserService extends CommonUtils {
     }
 
     private boolean isFieldsAreEmpty(UserDTO userDTO) {
-        if (userDTO.getEmail() == null || userDTO.getPassword() == null || userDTO.getRole() == null) {
+        if (userDTO.getEmail() == null || userDTO.getPassword() == null || userDTO.getRole() == null
+                || userDTO.getName() == null) {
             throw new InvalidInputException("Input fields are empty");
         }
         return false;
@@ -101,7 +94,7 @@ public class UserService extends CommonUtils {
         if (roleRepository.existsByRole(newRole)) {
             user.setRole(roleRepository.findByRole(newRole));
         } else {
-            Role role = modelSingletonManager.getRoleInstance();
+            Role role = new Role();
             role.setRole(newRole);
             roleRepository.save(role);
             user.setRole(role);

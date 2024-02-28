@@ -2,16 +2,17 @@ package com.zerp.taskmanagement.dto;
 
 public class UserDTO {
 
-    String email;
-    String role;
-    String password;
+    private String name;
+    private String email;
+    private String role;
+    private String password;
 
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.email = email.trim();
     }
 
     public String getRole() {
@@ -19,7 +20,7 @@ public class UserDTO {
     }
 
     public void setRole(String role) {
-        this.role = role.toUpperCase();
+        this.role = role.trim().toUpperCase();
     }
 
     public String getPassword() {
@@ -27,7 +28,16 @@ public class UserDTO {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = password.trim();
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    
 }

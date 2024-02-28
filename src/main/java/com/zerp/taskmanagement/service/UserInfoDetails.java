@@ -17,7 +17,7 @@ public class UserInfoDetails implements UserDetails {
     List<GrantedAuthority> authorities;
 
     public UserInfoDetails(User userInfo) {
-        userName = userInfo.getEmail();
+        userName = userInfo.getEmail().toLowerCase();
         password = userInfo.getPassword();
         authorities = Arrays.asList(new SimpleGrantedAuthority(userInfo.getRole().getRole()));
     }

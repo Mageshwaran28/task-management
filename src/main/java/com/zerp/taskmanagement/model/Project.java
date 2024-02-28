@@ -1,8 +1,13 @@
 package com.zerp.taskmanagement.model;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
+import com.zerp.taskmanagement.enums.Status;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,6 +28,13 @@ public class Project {
     private String name;
 
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime startDate;
+    private LocalDateTime dueDate;
 
     @OneToOne
     @JoinColumn(name = "creator_id", referencedColumnName = "id")
@@ -74,4 +86,37 @@ public class Project {
         this.assignees = assignees;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDateTime getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDateTime dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    
 }

@@ -14,6 +14,7 @@ create table roles (
 
 create table users (
 	id bigint auto_increment unique not null primary key,
+    name varchar(50) not null,
     email varchar(320) unique not null,
     role_id bigint not null,
     password varchar(70),
@@ -26,6 +27,10 @@ create table projects (
 	id bigint auto_increment unique not null primary key,
     name varchar(255) not null,
     description varchar(2000) not null,
+    status enum("PENDING" , "PROCESSING","HOLD", "COMPLETED") not null,
+    created_at datetime default now() not null,
+	start_date datetime not null ,
+	due_date datetime not null,
     creator_id bigint not null ,
     constraint projects_fk_creator_id 
     foreign key(creator_id) references users(id)
@@ -50,7 +55,7 @@ create table tasks (
     name varchar(255) not null,
     description varchar(2000) not null,
     priority enum("HIGH" , "MEDIUM" , "LOW") not null,
-	status enum("PENDING" , "PROCESSING", "COMPLETED") not null,
+	status enum("PENDING" , "PROCESSING","HOLD", "COMPLETED") not null,
     creator_id bigint not null,
 	created_at datetime default now() not null,
 	start_date datetime not null ,

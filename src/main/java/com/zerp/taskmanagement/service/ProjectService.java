@@ -1,5 +1,7 @@
 package com.zerp.taskmanagement.service;
 
+import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -10,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.zerp.taskmanagement.dto.ProjectDTO;
 import com.zerp.taskmanagement.dto.ProjectUpdateDTO;
+import com.zerp.taskmanagement.enums.Status;
 import com.zerp.taskmanagement.exceptions.EmptyInputException;
 import com.zerp.taskmanagement.exceptions.InvalidInputException;
 import com.zerp.taskmanagement.model.Project;
@@ -18,8 +21,6 @@ import com.zerp.taskmanagement.model.User;
 import com.zerp.taskmanagement.repository.ProjectAssignmentRepository;
 import com.zerp.taskmanagement.repository.ProjectRepository;
 import com.zerp.taskmanagement.repository.UserRepository;
-import com.zerp.taskmanagement.singletonmanager.CollectionSingletonManager;
-import com.zerp.taskmanagement.singletonmanager.ModelSingletonManager;
 import com.zerp.taskmanagement.utils.CommonUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,20 +38,25 @@ public class ProjectService extends CommonUtils {
     ProjectAssignmentRepository projectAssignmentRepository;
 
     @Autowired
-    ModelSingletonManager modelSingletonManager;
-
-    @Autowired
-    CollectionSingletonManager collectionSingletonManager;
+    MailService mailService;
 
     public Project createProject(ProjectDTO projectDTO, String creator) {
         isFieldsAreEmpty(projectDTO);
+        isValidStartDate(projectDTO.getStartDate());
+        isValidDueDate(projectDTO.getDueDate());
 
-        Project project = modelSingletonManager.getProjectInstance();
+        Project project = new Project();
         project.setName(projectDTO.getName());
         project.setDescription(projectDTO.getDescription());
         project.setCreator(getCreator(creator));
+        project.setStatus(getStatus(projectDTO.getStatus()));
+        project.setCreatedAt(LocalDateTime.now());
+        project.setStartDate(projectDTO.getStartDate());
+        project.setDueDate(projectDTO.getDueDate());
         project.setAssignees(getAssignees(projectDTO.getAssignees()));
         projectRepository.save(project);
+
+        mailService.acknwoledgeForCreatedProject(project);        
         return project;
 
     }
@@ -58,7 +64,8 @@ public class ProjectService extends CommonUtils {
     private boolean isFieldsAreEmpty(ProjectDTO projectDTO) {
 
         if (projectDTO.getName() == null || projectDTO.getDescription() == null
-                || projectDTO.getAssignees() == null || projectDTO.getAssignees().size() == 0) {
+                || projectDTO.getAssignees() == null || projectDTO.getAssignees().size() == 0
+                || projectDTO.getStatus() ==0 || projectDTO.getStartDate() == null || projectDTO.getDueDate() == null) {
             throw new EmptyInputException();
         }
 
@@ -83,7 +90,7 @@ public class ProjectService extends CommonUtils {
 
             for (User user : users) {
                 if (!isValidProjectAssignee(projectId, user.getEmail())) {
-                    ProjectAssignment assignment = modelSingletonManager.getProjectAssignmentInstance();
+                    ProjectAssignment assignment = new ProjectAssignment();
                     assignment.setProject(projectRepository.findById(projectId).get());
                     assignment.setAssignee(user);
                     projectAssignmentRepository.save(assignment);
@@ -116,7 +123,7 @@ public class ProjectService extends CommonUtils {
         User user = userRepository.findByEmailIgnoreCase(loginUser);
 
         List<ProjectAssignment> projectAssignments = projectAssignmentRepository.findByAssigneeId(user.getId());
-        List<Project> projects = collectionSingletonManager.getProjectLinkedListInstance();
+        List<Project> projects = new LinkedList<Project>();
 
         for (ProjectAssignment projectAssignment : projectAssignments) {
             projects.add(projectAssignment.getProject());
@@ -156,6 +163,13 @@ public class ProjectService extends CommonUtils {
         }
 
         return "Remove assignee" + assigneeId + " from project " + id;
+    }
+
+    public String updateProjectStatus(Long id, Status status) {
+        Project project = projectRepository.findById(id).get();
+        project.setStatus(status);
+        projectRepository.save(project);
+        return "Project status updated successfully ";
     }
 
 }
